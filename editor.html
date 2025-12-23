@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+   <style>
+     body{
+        background-color: rgb(82, 82, 82);
+        color: white;
+        font-family: monospace;
+        margin: 0;
+        min-height: 100svh;
+        padding: 0px;
+        overflow: hidden;
+        height: 100%;
+        width: 100svw;
+        display: flex;     
+     }
+     .screen{
+        flex-grow:1;
+        height: 100%;
+        width: 100%;
+        padding: 20px;
+        border-radius: 10px;
+        display: grid;
+        grid-template-rows:7svh 85svh;
+        grid-template-areas: "tabs""main";
+        gap: 10px;
+     }     
+     .main{
+        height: 100%;
+        grid-area: main;
+        border-radius: 10px;
+        padding: 10px;
+        background-color: rgb(29, 29, 29);
+        overflow-y: scroll;
+        overflow-x: hidden;
+     }
+     .main::-webkit-scrollbar {
+      position: fixed;
+     }
+
+.main::-webkit-scrollbar-track {
+box-shadow:none; /* Style of the track */
+}
+
+.main::-webkit-scrollbar-thumb {
+background-color: rgb(255, 255, 255); /* Color of the thumb */
+-webkit-backdrop-filter: blur(10px);
+backdrop-filter: blur(10px);
+border-radius: 10px 10px 10px 10px;
+}
+
+     .tabs{
+        display: flex;
+        grid-area: tabs;
+        background-color: rgb(29, 29, 29);
+        padding: 5px;
+        gap: 10px;
+        border-radius: 10px;
+        flex-direction: row;
+     }
+     .tabs span{
+        width: max-content;
+        border-radius: 10px;
+        font-size: 150%;
+        padding: 10px;
+        background-color:black;
+     }
+     .tabs span:hover{
+        background-color: white;
+        color: black;
+        cursor: pointer;
+     }
+     .login{
+        border-radius: 10px;
+        justify-content: center;
+        position:relative;
+        background-color: black;
+        width: fit-content;
+        padding: 10px;
+        height: 75svh;
+        font-size:3em;
+     }
+     .login input{
+        font-size: 1em;
+        border-radius: 10px;
+        background-color: rgb(29, 29, 29);
+        border: 0.5px solid white;
+        color: white;
+     }
+     button{
+        background-color: rgb(29, 29, 29);
+        color: white;
+        font-size: 0.6em;
+        border: none;
+        border-radius: 10px;
+     }
+     button:hover{
+        background-color: white;
+        color: black;
+     }
+     .logo{
+        font-size: 2em;
+        border-radius: 10px;
+        text-align: center;
+        color: white;
+     }
+      .view{
+        position: relative;
+        margin: 0px;
+        top: 0%;
+        border-radius: 10px;
+      }
+      .e-i{
+         display: flex;
+          width: 100%;
+          height: 100%;
+          flex-wrap: wrap;
+          gap: 10px;  
+      
+      }      
+      
+      #ta{
+         border: none;
+         min-width: 100%;
+         width: 100%;
+         min-width: 100%;
+         background-color: black;
+         padding: 10px;
+         border-radius: 10px;
+         width:50svw;
+         text-wrap: wrap;
+      }
+   </style>
+   <div class="screen">
+    <div class="tabs">
+        <span>run</span>
+    </div>
+    <div class="main">
+      <div class="e-i">
+         <div>
+            <img src="apple.png" class="view" height="500" width="500">
+         </div>
+         <div>
+            <div id="ta" contenteditable="true" oninput="col()" >
+               Type something here
+            </div>
+         </div>
+       </div>
+    </div>
+   </div>
+<script>
+   const col = () => {
+      const el = document.getElementById("ta");
+      const text = el.textContent; 
+      if (text.length === 0) return;
+      const remainder = text.slice(0, -1);
+      const lastChar = text.slice(-1);
+      el.innerHTML = `${remainder}<span style="color: red;font-size:3em;font-weight:bold;">${lastChar}</span>`;
+      placeCaretAtEnd(el);
+};
+
+function placeCaretAtEnd(el) {
+  el.focus();
+  const range = document.createRange();
+  const sel = window.getSelection();
+  range.selectNodeContents(el);
+  range.collapse(false);
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h2>Prompt Tester</h2>
+    <input type="text" id="userInput" placeholder="User Prompt">
+    <button onclick="sendData()">Check Equality</button>
+    <div id="response"></div>
+    <script>
+        async function sendData() {
+            const display = document.getElementById('response');
+            display.innerText = "Processing...";
+
+            const payload = {
+                user: document.getElementById('userInput').value,
+                prompt: "create a simple speech on chestertons fence",
+                result: "The Wisdom of Chesterton’s Fence..." // The speech text
+            };
+
+            try {
+                const response = await fetch('http://localhost:3000/eni/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                display.innerText = JSON.stringify(result.data, null, 2);
+            } catch (error) {
+                display.innerText = "Error: " + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

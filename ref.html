@@ -1,0 +1,71 @@
+
+
+<!doctype html>
+<html lang="en">
+    <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Node.js Native Real-Time</title>
+        <style>
+            body {
+                font-family: sans-serif;
+                padding: 20px;
+            }
+            #log {
+                border: 1px solid #ccc;
+                padding: 10px;
+                height: 300px;
+                overflow-y: scroll;
+                background: #f9f9f9;
+            }
+            .entry {
+                border-bottom: 1px solid #eee;
+                padding: 5px 0;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Real-Time Server Updates</h1>
+        <div id="status">Status: Connecting...</div>
+        <div id="data-display">Waiting for data...</div>
+
+        <h3>Event Log:</h3>
+        <div id="log"></div>
+
+        <script>
+            const logDiv = document.getElementById("log");
+            const statusDiv = document.getElementById("status");
+            const dataDisplay = document.getElementById("data-display");
+
+            // Connect to the Node.js SSE endpoint
+            const eventSource = new EventSource("/events");
+
+            eventSource.onopen = () => {
+                statusDiv.innerText = "Status: Connected (Live Stream)";
+                statusDiv.style.color = "green";
+            };
+
+            eventSource.onmessage = (event) => {
+                // Parse the JSON data sent by the server
+                const data = JSON.parse(event.data);
+
+                // Update the UI
+                if (data.time) {
+                    dataDisplay.innerText = `Current Time: ${data.time} | Random Value: ${data.value}`;
+                }
+
+                // Log the raw entry
+                const newEntry = document.createElement("div");
+                newEntry.className = "entry";
+                newEntry.innerText = `Received: ${event.data}`;
+                logDiv.prepend(newEntry);
+            };
+
+            eventSource.onerror = () => {
+                statusDiv.innerText = "Status: Disconnected";
+                statusDiv.style.color = "red";
+                eventSource.close();
+            };
+        </script>
+    </body>
+</html>

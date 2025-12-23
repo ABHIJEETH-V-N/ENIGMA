@@ -1,0 +1,128 @@
+ <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Admin Command Center</title>
+        <style>
+            body { font-family: sans-serif; display: flex; height: 100vh; margin: 0; background: #1a1a1a; color: #eee; }
+            .panel { flex: 1; padding: 25px; border-right: 1px solid #333; display: flex; flex-direction: column; }
+            h2 { margin-top: 0; color: #4dabf7; border-bottom: 1px solid #333; padding-bottom: 10px; }
+            
+            textarea { 
+                width: 100%; 
+                flex-grow: 1; 
+                background: #2a2a2a; 
+                color: #fff; 
+                border: 1px solid #444; 
+                padding: 15px; 
+                font-family: monospace; 
+                border-radius: 4px;
+                resize: none;
+                margin-bottom: 15px;
+            }
+            
+            .controls { display: flex; gap: 10px; margin-bottom: 20px; }
+            button { 
+                cursor: pointer; padding: 12px 20px; border: none; border-radius: 4px; 
+                font-weight: bold; transition: filter 0.2s;
+            }
+            button:hover { filter: brightness(1.2); }
+            
+            .btn-push { background: #228be6; color: white; flex: 2; }
+            .btn-clear { background: #fa5252; color: white; flex: 1; }
+            
+            #userList { overflow-y: auto; flex-grow: 1; }
+            .user-row { 
+                display: flex; justify-content: space-between; align-items: center;
+                padding: 12px; background: #2a2a2a; margin-bottom: 8px; 
+                border-radius: 4px; border-left: 4px solid #4dabf7;
+            }
+            .user-info { display: flex; flex-direction: column; }
+            .user-id { font-size: 0.8rem; color: #888; }
+            .user-ip { font-weight: bold; }
+            
+            .btn-kick { background: #e03131; color: white; padding: 6px 12px; font-size: 0.8rem; }
+            
+            .status-bar { padding: 10px; font-size: 0.9rem; color: #888; border-top: 1px solid #333; }
+        </style>
+    </head>
+    <body>
+        <div class="panel">
+            <h2>Content Controller</h2>
+            <textarea id="htmlInput" placeholder="Paste HTML/CSS code here to update the main site..."></textarea>
+            <div class="controls">
+                <button class="btn-push" onclick="pushContent()">🚀 PUSH UPDATE</button>
+                <button class="btn-clear" onclick="clearInput()">CLEAR</button>
+            </div>
+            <h3>Quick Actions</h3>
+            <div style="display: flex; gap: 10px;">
+                <button style="background: #444; color: white;" onclick="setPreset('red')">Emergency Alert</button>
+                <button style="background: #444; color: white;" onclick="setPreset('welcome')">Welcome Screen</button>
+            </div>
+        </div>
+        
+        <div class="panel" style="max-width: 400px;">
+            <h2>Live Users <h1 id="a1">0</h1></h2>
+            <div id="userList"></div>
+            <div class="status-bar" id="status">System Ready</div>
+        </div>
+
+        <script>
+            const socket = new WebSocket('ws://localhost:4000');
+            const userList = document.getElementById('userList');
+            const htmlInput = document.getElementById('htmlInput');
+            function pushContent() {
+                const html = htmlInput.value;
+                if(!html.trim()) return;
+                socket.send(JSON.stringify({ type: 'PUSH_CONTENT', html: html }));
+                updateStatus("Update pushed to all users.");
+            }
+
+            function clearInput() { htmlInput.value = ''; }
+
+            function kickUser(id) {
+                if(confirm("Kick user " + id + "?")) {
+                    socket.send(JSON.stringify({ type: 'KICK_USER', targetId: id }));
+                }
+            }
+
+            function updateStatus(msg) {
+                document.getElementById('status').innerText = msg;
+                setTimeout(() => document.getElementById('status').innerText = "System Ready", 2026);
+            }
+
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+
+                if (data.type === 'USER_JOINED') {
+                    if (document.getElementById(data.id)) return;
+                    const div = document.createElement('div');
+                    div.id = data.id;
+                    div.className = 'user-row';
+                    div.innerHTML = 
+                        <div class="user-info">
+                            <span class="user-ip">\${data.ip}</span>
+                            <span class="user-id">\${data.id}</span>
+                        </div>
+                        <button class="btn-kick" onclick="kickUser('\${data.id}')">KICK</button>
+                    ;
+                    userList.appendChild(div);
+                    document.getElementByID("")
+                }
+
+                if (data.type === 'USER_LEFT') {
+                    document.getElementById(data.id)?.remove();
+                }
+            };
+
+            function setPreset(type) {
+                if(type === 'red') {
+                    htmlInput.value = '<div style="background: #e03131; color: white; height: 100vh; display: flex; align-items: center; justify-content: center; font-size: 5rem;">⚠️ ATTENTION REQUIRED</div>';
+                } else if(type === 'welcome') {
+                    htmlInput.value = '<div style="text-align: center; padding-top: 100px;"><h1>Welcome to the Presentation</h1><p>Please wait for instructions.</p></div>';
+                }
+                pushContent();
+            }
+        </script>
+    </body>
+    </html>`;

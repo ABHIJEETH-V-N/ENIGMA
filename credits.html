@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENIGMA: END_OF_TRANSMISSION</title>
+    <style>
+        :root {
+            --red: #ff0000;
+            --dark-red: #440000;
+            --black: #050505;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--black);
+            color: var(--red);
+            font-family: monospace;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        /* Film Grain / Static Overlay */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExYTFtdjBjbHB1bHNlazlibTltM3h5ZWMxNWw4a2p5aXVoYXUwdmt2OCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3oriNQ9p8DqusVzrBC/giphy.gif');
+            opacity: 0.5;
+            filter: blur(20px);
+            pointer-events: none;
+            background-repeat: no-repeat;
+            background-size: cover;
+            z-index: 0;
+        }
+
+        /* Vertical Scroll Container */
+        .credits-container {
+            position: absolute;
+            width: 100%;
+            top: 100%;
+            animation: scroll 40s linear forwards;
+        }
+
+        @keyframes scroll {
+            0% { top: 100%; }
+            100% { top: -220%; }
+        }
+
+        .credit-block {
+            text-align: center;
+            margin-bottom: 150px;
+        }
+
+        .role {
+            font-size: 0.8rem;
+            letter-spacing: 8px;
+            color: #444;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .name {
+            font-size: 2rem;
+            letter-spacing: 2px;
+            font-weight: bold;
+            text-shadow: 0 0 15px var(--red);
+        }
+
+        /* The Final Static Screen */
+        #final-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: black;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .static-text {
+            font-size: 8rem;
+            font-weight: 900;
+            letter-spacing: 20px;
+            filter: blur(5px);
+            opacity: 0.3;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .static-active {
+            filter: blur(0px) !important;
+            opacity: 1 !important;
+            text-shadow: 0 0 20px red, 0 0 40px red;
+        }
+
+        .instruction {
+            position: absolute;
+            bottom: 50px;
+            color: #333;
+            letter-spacing: 5px;
+            font-size: 0.7rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.8; }
+        }
+
+        pre {
+            font-size: 10px;
+            line-height: 1;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay"></div>
+
+    <div class="credits-container" id="credits">
+        <div class="credit-block">
+            <pre>
+  ███████╗███╗   ██╗██╗ ██████╗ ███╗   ███╗ █████╗ 
+  ██╔════╝████╗  ██║██║██╔════╝ ████╗ ████║██╔══██╗
+  █████╗  ██╔██╗ ██║██║██║  ███╗██╔████╔██║███████║
+  ██╔══╝  ██║╚██╗██║██║██║   ██║██║╚██╔╝██║██╔══██║
+  ███████╗██║ ╚████║██║╚██████╔╝██║ ╚═╝ ██║██║  ██║
+  ╚══════╝╚═╝  ╚═══╝╚═╝ ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝
+            </pre>
+        </div>
+
+        <div class="credit-block">
+            <div class="role">Directed By</div>
+            <div class="name">THE ALGORITHM</div>
+        </div>
+
+        <div class="credit-block">
+            <div class="role">Lead Intel Architect</div>
+            <div class="name">OPERATIVE_X</div>
+        </div>
+
+        <div class="credit-block">
+            <div class="role">Encryption Protocols</div>
+            <div class="name">ALAN_TURING_LEGACY</div>
+        </div>
+
+        <div class="credit-block">
+            <div class="role">Visual Reconstruction</div>
+            <div class="name">NEURAL_DENSITY_LABS</div>
+        </div>
+
+        <div class="credit-block">
+            <div class="role">Data Recovery Specialists</div>
+            <div class="name">THE PARTICIPANTS</div>
+        </div>
+
+        <div class="credit-block">
+            <div class="role">Post-War Records</div>
+            <div class="name">BLETCHLEY_PARK_V4</div>
+        </div>
+
+        <div class="credit-block">
+            <div class="role">Special Thanks</div>
+            <div class="name">PROJECT_ENIGMA_DONORS</div>
+        </div>
+
+        <div class="credit-block" style="margin-top: 300px;">
+            <div class="name" style="color: #222;">SIGNAL LOST...</div>
+        </div>
+    </div>
+
+    <div id="final-screen">
+        <div class="static-text" id="logo-text">ENIGMA</div>
+        <div class="instruction">MOVE MOUSE TO STABILIZE SIGNAL</div>
+        <pre id="ascii-final" style="opacity: 0.2;"></pre>
+    </div>
+
+    <script>
+        const credits = document.getElementById('credits');
+        const finalScreen = document.getElementById('final-screen');
+        const logoText = document.getElementById('logo-text');
+
+        // Trigger the final static screen after credits finish (approx 40s)
+        setTimeout(() => {
+            credits.style.display = 'none';
+            finalScreen.style.display = 'flex';
+        }, 38000);
+
+        // Interactive Interaction: Moving mouse "stabilizes" the signal
+        window.addEventListener('mousemove', (e) => {
+            if (finalScreen.style.display === 'flex') {
+                const x = e.clientX / window.innerWidth;
+                const y = e.clientY / window.innerHeight;
+
+                // If mouse is near center, clear the static
+                if (x > 0.3 && x < 0.7 && y > 0.3 && y < 0.7) {
+                    logoText.classList.add('static-active');
+                    logoText.style.filter = `blur(${Math.random() * 2}px)`;
+                    logoText.style.transform = `scale(${1 + Math.random() * 0.05})`;
+                } else {
+                    logoText.classList.remove('static-active');
+                    logoText.style.filter = `blur(${10 + Math.random() * 10}px)`;
+                }
+            }
+        });
+
+        // Mobile touch support
+        window.addEventListener('touchmove', (e) => {
+             logoText.classList.add('static-active');
+             setTimeout(() => logoText.classList.remove('static-active'), 500);
+        });
+
+        // Click to restart
+        finalScreen.addEventListener('click', () => {
+            location.reload();
+        });
+    </script>
+</body>
+</html>

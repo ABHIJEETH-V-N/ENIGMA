@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROJECT ENIGMA: POST-WAR INTERFACE</title>
+</head>
+<body>
+   <style>
+     :root {
+        --camo-green: #354230;
+        --heavy-steel: #2b2b2b;
+        --terminal-red: #ff3333;
+        --terminal-glow: rgba(255, 0, 0, 0.5);
+        --bakelite: #120d0d;
+        text-shadow: 0 0 10px currentColor;
+     }
+
+     body {
+        background-color: #0a0a0a;
+        background-image: radial-gradient(circle, #220000 1px, transparent 1px);
+        background-size: 30px 30px;
+        color: var(--terminal-red);
+        font-family: 'Courier New', monospace;
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+     }
+
+     
+
+     .screen {
+        width: 95vw;
+        height: 92vh;
+        background: #121212;
+        border: 4px solid #333;
+        border-radius: 5px;
+        box-shadow: 0 0 40px #000;
+        display: flex;
+        flex-direction: column;
+        padding: 15px;
+        box-sizing: border-box;
+        position: relative;
+        gap: 15px;
+     }
+
+     .tabs {
+        background: var(--bakelite);
+        border: 1px solid #444;
+        box-shadow: inset 0 0 15px #000;
+        overflow: hidden;
+        white-space: nowrap;
+        padding: 10px 0;
+        position: relative;
+     }
+
+     .ticker-wrap {
+        display: inline-block;
+        animation: ticker 10s linear infinite;
+        gap: 0px;
+     }
+
+     .ticker-item {
+        display: inline-block;
+        font-weight: bold;
+        font-size: 1.2rem;
+        color: var(--terminal-red);
+        text-shadow: 0 0 8px var(--terminal-red);
+     }
+
+     @keyframes ticker {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+     }
+
+     .main {
+        display: flex;
+        flex: 1; 
+        gap: 20px;
+        min-height: 0; 
+     } 
+
+     .image-container {
+        flex: 1.2;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #000;
+        border: 2px solid #333;
+        overflow: hidden;
+        position: relative;
+     }
+
+   
+     #displayImage {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+     }
+
+     .input-column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        min-height: 0;
+     }
+
+     #ta {
+        flex: 1;
+        background-color: #080808;
+        border: 2px solid #222;
+        padding: 20px;
+        color: #eee;
+        font-size: 1.1rem;
+        outline: none;
+        box-shadow: inset 0 0 20px #000;
+        overflow-y: auto;
+        word-wrap: break-word;
+        line-break: strict;
+        line-height: 1.5;
+        position: relative;
+     }
+
+     #ta:empty:before {
+        content: "TYPE_OBSERVATIONS_HERE...";
+        color: #441111;
+     }
+
+     .submit-btn {
+        background: #220000;
+        color: var(--terminal-red);
+        padding: 15px;
+        border: 2px solid var(--terminal-red);
+        cursor: pointer;
+        font-family: inherit;
+        font-weight: bold;
+        text-transform: uppercase;
+        transition: 0.1s;
+        letter-spacing: 2px;
+        width: 100%;
+     }
+
+     .submit-btn:hover {
+        background: var(--terminal-red);
+        color: #000;
+        box-shadow: 0 0 20px var(--terminal-glow);
+     }
+
+     .submit-btn:active {
+        transform: scale(0.98);
+     }
+
+     @media (max-width: 768px) {
+        .main {
+            flex-direction: column;
+        }
+        .image-container {
+            flex: 0 0 35%; 
+        }
+        .input-column {
+            flex: 1;
+        }
+     }
+
+     #ta::-webkit-scrollbar { width: 6px; }
+     #ta::-webkit-scrollbar-track { background: #0a0a0a; }
+     #ta::-webkit-scrollbar-thumb { background: #441111; border-radius: 10px; }
+   </style>
+
+   <div class="screen">
+    <div class="tabs">
+        <div class="ticker-wrap">
+            <span class="ticker-item">ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * </span>
+            <span class="ticker-item">ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * </span>
+        </div>
+    </div>
+    
+    <div class="main">
+        <div class="image-container">
+            <img id="displayImage" src="apple.png" alt="SECURE_FEED">
+        </div>
+        
+        <div class="input-column">
+            <div id="ta" contenteditable="true" spellcheck="false"></div>
+            <button class="submit-btn" onclick="handleSubmit()">SUBMIT_LOG & NEXT_FEED</button>
+        </div>
+    </div>
+   </div>
+
+   <script>
+      const images = ["apple.png", "cat.png", "chair.png"]; 
+      let currentIdx = 0;
+
+      function handleSubmit() {
+          const textArea = document.getElementById('ta');
+          const imgElement = document.getElementById('displayImage');
+
+          if(textArea.innerText.trim() !== "") {
+              console.log("TX:", textArea.innerText);
+          }
+          
+          textArea.innerText = "";
+          currentIdx = (currentIdx + 1) % images.length;
+          
+          imgElement.style.filter = "brightness(3) invert(1)";
+          
+          setTimeout(() => {
+              imgElement.src = images[currentIdx];
+              imgElement.style.filter = "invert(0)";
+          }, 100);
+
+          textArea.focus();
+      }
+   </script>
+</body>
+</html>

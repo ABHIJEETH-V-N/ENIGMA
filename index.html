@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+   <style>
+     body{
+        background-color: rgb(82, 82, 82);
+        color: white;
+        font-family: monospace;
+        margin: 0;
+        min-height: 100svh;
+        padding: 0px;
+        overflow: hidden;
+        height: 100%;
+        width: 100svw;
+        display: flex;     
+     }
+     .screen{
+        flex-grow:1;
+        height: 100%;
+        width: 100%;
+        padding: 20px;
+        border-radius: 10px;
+        display: grid;
+        grid-template-rows:7svh 85svh;
+        grid-template-areas: "tabs""main";
+        gap: 10px;
+     }     
+     .main{
+        height: 100%;
+        grid-area: main;
+        border-radius: 10px;
+        padding: 10px;
+        background-color: rgb(29, 29, 29);
+     }
+     .tabs{
+        display: flex;
+        grid-area: tabs;
+        background-color: rgb(29, 29, 29);
+        padding: 5px;
+        gap: 10px;
+        border-radius: 10px;
+        flex-direction: row;
+     }
+     .tabs span{
+        width: max-content;
+        border-radius: 10px;
+        font-size: 150%;
+        padding: 10px;
+        background-color:black;
+     }
+     .tabs span:hover{
+        background-color: white;
+        color: black;
+        cursor: pointer;
+     }
+     .login{
+        border-radius: 10px;
+        justify-content: center;
+        position:relative;
+        background-color: black;
+        width: fit-content;
+        padding: 10px;
+        height: 75svh;
+        font-size:3em;
+     }
+     .login input{
+        font-size: 1em;
+        border-radius: 10px;
+        background-color: rgb(29, 29, 29);
+        border: 0.5px solid white;
+        color: white;
+     }
+     button{
+        background-color: rgb(29, 29, 29);
+        color: white;
+        font-size: 0.6em;
+        border: none;
+        border-radius: 10px;
+     }
+     button:hover{
+        background-color: white;
+        color: black;
+     }
+     .logo{
+        font-size: 2em;
+        border-radius: 10px;
+        text-align: center;
+        color: white;
+     }
+   </style>
+   <div class="screen">
+    <div class="tabs">
+        <span>login</span>
+        <span>admin</span>
+    </div>
+    <div class="main">
+        <h1>LOGIN</h1>    
+        <div class="login">
+            <legend><label>USERNAME</label></legend>
+            <input type="text" id="user" title="username"></br>
+            <legend><label>PASSWORD</label></legend>
+            <input type="password" id="pass" title="password">
+            <br>
+            <button>SIGN IN</button>
+        </div>
+    </div>
+   </div>
+   <script>
+
+   </script>
+</body>
+</html>
