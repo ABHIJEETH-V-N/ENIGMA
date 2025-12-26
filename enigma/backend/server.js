@@ -53,7 +53,7 @@ async function PixelScore(user) {
 
 
 async function getGroqResponse(content) {
-    const api = "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"; // Use environment variables for security!
+    const api = ""; // Use environment variables for security!
     const url = "https://api.groq.com/openai/v1/chat/completions";
     
     const response = await fetch(url, {
