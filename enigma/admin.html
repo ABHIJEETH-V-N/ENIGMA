@@ -12,7 +12,7 @@
         background-image: radial-gradient(circle, #220000 1px, transparent 1px);
         background-size: 30px 30px;
         color: var(--terminal-red);
-        font-family: "Courier New", monospace;
+        font-family: monospace;
         margin: 0;
         height: 100vh;
         display: flex;
@@ -74,7 +74,7 @@
         background-repeat: no-repeat;
       }
 
-      .switch .button::before {
+      .switch .button::after {
         content: "";
         background: linear-gradient(
               rgba(255, 255, 255, 0.8) 10%,
@@ -93,7 +93,7 @@
         top: 0;
       }
 
-      .switch .button::after {
+      .switch .button::before {
         content: "";
         background-image: linear-gradient(#650000, #320000);
         width: 100%;
@@ -199,46 +199,94 @@
         background-color: #47434c;
         display: flex;
       }
+      h1 {
+        background-color: white;
+        color: black;
+        font-weight: bolder;
+        border-radius: 10px;
+        text-align: center;
+      }
     </style>
   </body>
-    <div class="main">
-        <fieldset class="round">
-          <legend>ROUND CONTROLS</legend>
-          <label class="switch">
-            <input type="checkbox" checked="checked" />
-            <div class="button">
-              <div class="light"></div>
-              <div class="dots"></div>
-              <div class="characters"></div>
-              <div class="shine"></div>
-              <div class="shadow"></div>
-            </div>
-            <h1>start</h1>
-          </label>
-          <label class="switch">
-            <input type="checkbox" checked="checked" />
-            <div class="button">
-              <div class="light"></div>
-              <div class="dots"></div>
-              <div class="characters"></div>
-              <div class="shine"></div>
-              <div class="shadow"></div>
-            </div>
-            <h1>round-1</h1>
-          </label>
-          <label class="switch">
-            <input type="checkbox" checked="checked" />
-            <div class="button">
-              <div class="light"></div>
-              <div class="dots"></div>
-              <div class="characters"></div>
-              <div class="shine"></div>
-              <div class="shadow"></div>
-            </div>
-          </label>
-        </fieldset>
-      <div class="">
+  <div class="main">
+    <fieldset class="round">
+      <legend>ROUND CONTROLS</legend>
+      <label class="switch">
+        <input
+          id="btn1"
+          type="checkbox"
+          onclick="round('lobby',this)"
 
-      </div>
+        />
+        <div id="btn1" class="button">
+          <div class="light"></div>
+          <div class="dots"></div>
+          <div class="characters"></div>
+          <div class="shine"></div>
+          <div class="shadow"></div>
+        </div>
+        <h1>LOBBY</h1>
+      </label>
+      <label class="switch">
+        <input
+          id="btn2"
+          type="checkbox"
+          onclick="round('round1',this)"
+          checked
+        />
+        <div class="button">
+          <div class="light"></div>
+          <div class="dots"></div>
+          <div class="characters"></div>
+          <div class="shine"></div>
+          <div class="shadow"></div>
+        </div>
+        <h1>ROUND-1</h1>
+      </label>
+      <label class="switch">
+        <input
+          id="btn3"
+          type="checkbox"
+          onclick="round('round2',this)"
+          checked
+        />
+        <div class="button">
+          <div class="light"></div>
+          <div class="dots"></div>
+          <div class="characters"></div>
+          <div class="shine"></div>
+          <div class="shadow"></div>
+        </div>
+        <h1>ROUND-2</h1>
+      </label>
+    </fieldset>
+    <div class="">
+      <div contenteditable="true"></div>
     </div>
+  </div>
+  <script>
+    const ws = new WebSocket(
+      "ws://" + (window.location.hostname || "localhost") + ":4000"
+    );
+    var temp;
+    ws.onopen = () => {
+      console.log("connected to the server");
+    };
+    const checkboxes = document.querySelectorAll(
+      '.switch input[type="checkbox"]'
+    );
+    console.log(checkboxes);
+    
+    const round = (roundName, btn) => {
+      console.log("Switching to: %s", roundName);
+      const msg={type:"cs",data:roundName}
+      ws.send(JSON.stringify(msg));
+      checkboxes.forEach((box) => {
+        if (box !== btn) {
+          box.checked = true;
+        }
+      });
+      btn.checked = false;      
+    };
+  </script>
 </html>

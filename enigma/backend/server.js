@@ -102,7 +102,6 @@ If you want to tear the fence down, Chesterton says you must first go away and f
 
 Conclusion
 As we move forward in our careers and lives, let’s try to be builders who understand history, not just wrecking balls. Before we declare something "pointless," let's do the work to find the point. Only by respecting the past can we effectively build the future.
-
 Thank you.
 
 Would you like me to adapt this speech to be more specific to a professional setting or a school environment?`);*/

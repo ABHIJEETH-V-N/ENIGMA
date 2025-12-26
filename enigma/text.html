@@ -1,0 +1,606 @@
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --term-green: #33ff00;
+            --term-glow: #33ff00aa;
+            --term-white: #e0e0e0;
+            --term-dim: #444;
+            --font-stack: 'Share Tech Mono', 'Fira Code', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scrollbar-width: thin;
+            scrollbar-color: var(--term-green) var(--bg-color);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--term-green);
+            font-family: var(--font-stack);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Scanline effect */
+        body::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(to bottom,
+                    rgba(255, 255, 255, 0),
+                    rgba(255, 255, 255, 0) 50%,
+                    rgba(0, 0, 0, 0.1) 50%,
+                    rgba(0, 0, 0, 0.1));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* CRT Flicker */
+        @keyframes flicker {
+            0% {
+                opacity: 0.97;
+            }
+
+            5% {
+                opacity: 0.95;
+            }
+
+            10% {
+                opacity: 0.9;
+            }
+
+            15% {
+                opacity: 0.95;
+            }
+
+            20% {
+                opacity: 0.98;
+            }
+
+            25% {
+                opacity: 0.95;
+            }
+
+            30% {
+                opacity: 0.9;
+            }
+
+            35% {
+                opacity: 0.96;
+            }
+
+            40% {
+                opacity: 0.98;
+            }
+
+            45% {
+                opacity: 0.95;
+            }
+
+            50% {
+                opacity: 0.99;
+            }
+
+            55% {
+                opacity: 0.93;
+            }
+
+            60% {
+                opacity: 0.9;
+            }
+
+            65% {
+                opacity: 0.96;
+            }
+
+            70% {
+                opacity: 1;
+            }
+
+            75% {
+                opacity: 0.97;
+            }
+
+            80% {
+                opacity: 0.95;
+            }
+
+            85% {
+                opacity: 0.92;
+            }
+
+            90% {
+                opacity: 0.95;
+            }
+
+            95% {
+                opacity: 0.99;
+            }
+
+            100% {
+                opacity: 0.94;
+            }
+        }
+
+        .crt-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(18, 16, 16, 0.1);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 11;
+            animation: flicker 0.15s infinite;
+        }
+
+        /* Container */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            /* margin-bottom: 2rem; Removed bottom margin here, handled by marquee */
+            /* border-bottom: 2px solid var(--term-dim); Removed border, moved to marquee */
+            padding-bottom: 1rem;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3rem;
+            text-shadow: 0 0 10px var(--term-glow);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Marquee / Scrolling Subtitle */
+        .marquee-container {
+            width: 100%;
+            overflow: hidden;
+            border-bottom: 2px solid var(--term-dim);
+            /* Moved border here or distinct separator */
+            border-top: 1px solid var(--term-dim);
+            padding: 0.5rem 0;
+            margin-bottom: 2rem;
+            position: relative;
+            background: rgba(0, 5, 0, 0.9);
+            box-shadow: inset 0 0 15px #000;
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        }
+
+        .marquee-track {
+            display: flex;
+            gap: 4rem;
+            width: max-content;
+            animation: marquee 30s linear infinite;
+            /* Slow movement */
+        }
+
+        /* Pause on hover optional? User didn't ask. */
+
+        .marquee-item {
+            color: var(--term-white);
+            font-size: 1rem;
+            letter-spacing: 0.1rem;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            white-space: nowrap;
+        }
+
+        .warning-symbol {
+            color: var(--term-green);
+            font-size: 1.2rem;
+            text-shadow: 0 0 8px var(--term-green);
+            animation: blink-warning 2s infinite;
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+
+            /* Ensure content is doubled so -50% is a seamless loop point */
+        }
+
+        @keyframes blink-warning {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Main Layout */
+        main {
+            display: flex;
+            flex: 1;
+            gap: 2rem;
+            overflow: hidden;
+            /* Prevent body scroll */
+        }
+
+        /* Panels common styles */
+        .panel {
+            flex: 1;
+            border: 1px solid var(--term-green);
+            background: rgba(0, 20, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 15px rgba(51, 255, 0, 0.1);
+            -webkit-backdrop-filter: blur(2px);
+            backdrop-filter: blur(2px);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .panel:hover {
+            box-shadow: 0 0 20px rgba(51, 255, 0, 0.2);
+            border-color: #55ff55;
+        }
+
+        .panel-header {
+            background-color: var(--term-green);
+            color: black;
+            padding: 0.5rem 1rem;
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .panel-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        /* Left Panel - Static Text */
+        #instructions-text {
+            white-space: pre-wrap;
+            color: var(--term-white);
+        }
+
+        .cursor-block {
+            display: inline-block;
+            width: 10px;
+            height: 1.2em;
+            background-color: var(--term-green);
+            vertical-align: text-bottom;
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* Right Panel - Input */
+        .input-panel {
+            display: flex;
+            flex-direction: column;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            color: var(--term-green);
+            font-family: var(--font-stack);
+            font-size: 1.1rem;
+            resize: none;
+            outline: none;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        textarea::placeholder {
+            color: rgba(51, 255, 0, 0.3);
+        }
+
+        /* Footer / Button area */
+        .action-area {
+            padding: 1rem;
+            border-top: 1px solid var(--term-dim);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .status-line {
+            margin-right: auto;
+            font-size: 0.8rem;
+            color: var(--term-dim);
+        }
+
+        button {
+            background: transparent;
+            color: var(--term-green);
+            border: 1px solid var(--term-green);
+            padding: 0.8rem 2rem;
+            font-family: var(--font-stack);
+            font-size: 1rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            background: var(--term-green);
+            color: black;
+            box-shadow: 0 0 15px var(--term-glow);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #225500;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--term-green);
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            body {
+                height: auto;
+                min-height: 100vh;
+                overflow-y: auto;
+                /* Enable page scrolling */
+                overflow-x: hidden;
+            }
+
+            .app-container {
+                padding: 1rem;
+                height: auto;
+                overflow: visible;
+            }
+
+            main {
+                flex-direction: column;
+                height: auto;
+                gap: 2rem;
+            }
+
+            .panel {
+                /* Use viewport-relative height for mobile to ensure usability */
+                height: 50vh;
+                min-height: 300px;
+                flex: none;
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 2rem;
+                letter-spacing: 0.1rem;
+            }
+
+            /* Adjust header for mobile */
+            header {
+                margin-bottom: 1rem;
+                padding-bottom: 0.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="crt-overlay"></div>
+
+    <div class="app-container">
+        <header>
+            <h1>Enigma</h1>
+        </header>
+
+        <!-- Scrolling Subtitle Section -->
+        <div class="marquee-container">
+            <div class="marquee-track">
+                <!-- Content repeated enough times to ensure seamless loop (at least 2 full widths) -->
+                <!-- Set 1 -->
+
+                <div class="marquee-item"><span class="warning-symbol">⚠</span> WARNING! </div>
+                  <div class="marquee-item"><span class="warning-symbol">⚠</span> WARNING! </div>
+                    <div class="marquee-item"><span class="warning-symbol">⚠</span> WARNING! </div>
+                      <div class="marquee-item"><span class="warning-symbol">⚠</span> WARNING! </div>
+                        <div class="marquee-item"><span class="warning-symbol">⚠</span> WARNING! </div>
+                          <div class="marquee-item"><span class="warning-symbol">⚠</span> WARNING! </div>
+              
+
+                <!-- Set 2 and 3 removed as requested -->
+            </div>
+        </div>
+
+        <main>
+            <!-- Left Panel: Instructions -->
+            <section class="panel">
+                <div class="panel-header">
+                    <span>> System_Message</span>
+                    <span>[READ_ONLY]</span>
+                </div>
+                <div class="panel-content" id="terminal-output">
+                    <!-- Text will be typed here by JS -->
+                    <span id="typewriter-text"></span><span class="cursor-block"></span>
+                </div>
+            </section>
+
+            <!-- Right Panel: Input -->
+            <section class="panel input-panel">
+                <div class="panel-header">
+                    <span>> User_Input</span>
+                    <span>[EDITABLE]</span>
+                </div>
+                <div class="panel-content">
+                    <textarea id="user-input" placeholder="> Enter your solution here..." spellcheck="false"></textarea>
+                </div>
+                <div class="action-area">
+                    <div class="status-line" id="status-line">Status: WAITING_FOR_INPUT...</div>
+                    <button id="submit-btn" onclick="handleSubmit()">Execute</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Configuration
+        const instructionText = `A futuristic university campus with modern buildings and flying drones, wide-angle view with sunset lighting in a sci-fi theme.`;
+
+        // Typewriter Effect
+        const typeWriterElement = document.getElementById('typewriter-text');
+        const speed = 20; // ms per char
+        let i = 0;
+
+        function typeWriter() {
+            if (i < instructionText.length) {
+                typeWriterElement.textContent += instructionText.charAt(i);
+                i++;
+                // Scroll to bottom
+                const panelContent = typeWriterElement.parentElement;
+                panelContent.scrollTop = panelContent.scrollHeight;
+                setTimeout(typeWriter, speed);
+            }
+        }
+
+        // Start typing on load
+        window.addEventListener('load', () => {
+            setTimeout(typeWriter, 500);
+
+            // Focus textarea on load?? Maybe not to allow reading first.
+            // But let's set focus when they click anywhere in the right panel
+            const inputPanel = document.querySelector('.input-panel');
+            inputPanel.addEventListener('click', () => {
+                document.getElementById('user-input').focus();
+            });
+        });
+
+        // Submit Logic
+        function handleSubmit() {
+            const input = document.getElementById('user-input');
+            const btn = document.getElementById('submit-btn');
+            const statusLine = document.getElementById('status-line');
+            const val = input.value.trim();
+
+            if (!val) {
+                statusLine.textContent = "Status: ERROR [EMPTY_INPUT]";
+                statusLine.style.color = "red";
+                setTimeout(() => {
+                    statusLine.textContent = "Status: WAITING_FOR_INPUT...";
+                    statusLine.style.color = "var(--term-dim)";
+                }, 2000);
+                return;
+            }
+
+            // Simulate processing
+            statusLine.textContent = "Status: PROCESSING...";
+            btn.innerHTML = "Submitting...";
+            btn.disabled = true;
+            input.disabled = true;
+
+            setTimeout(() => {
+                // Here is where you'd validate the answer or send to server
+                // For demo, we just reset or show success
+
+                // Demo success/fail logic (Just for visual)
+                const isCorrect = val.toLowerCase() === "some answer";
+                // Note: User didn't ask for real validation logic, just UI.
+
+                statusLine.textContent = "Status: DATA_SENT_SUCCESSFULLY";
+                statusLine.style.color = "var(--term-green)";
+
+                btn.innerHTML = "Execute_Sequence";
+                btn.disabled = false;
+                input.disabled = false;
+                input.value = "";
+                input.focus();
+
+                alert("COMMAND RECEIVED.\nSolution: " + val + "\n\n(Submitted to Enigma.)");
+
+                setTimeout(() => {
+                    statusLine.textContent = "Status: WAITING_FOR_INPUT...";
+                    statusLine.style.color = "var(--term-dim)";
+                }, 3000);
+
+            }, 1000);
+        }
+
+        // Add support for Ctrl+Enter to submit
+        document.getElementById('user-input').addEventListener('keydown', function (e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                handleSubmit();
+            }
+        });
+
+        // Typing status effect
+        let typingTimer;
+        const userInputBox = document.getElementById('user-input');
+        const statusLabel = document.getElementById('status-line');
+
+        userInputBox.addEventListener('input', () => {
+            statusLabel.textContent = "Status: TYPING...";
+            statusLabel.style.color = "var(--term-white)";
+
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                statusLabel.textContent = "Status: WAITING_FOR_INPUT...";
+                statusLabel.style.color = "var(--term-dim)";
+            }, 800);
+        });
+
+    </script>

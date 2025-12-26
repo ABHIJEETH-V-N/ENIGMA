@@ -20,5 +20,6 @@ const fetch=async(res,query)=>{
     }
 }
 
+fetch(res,"exe function()")
 
 export default fetch;
