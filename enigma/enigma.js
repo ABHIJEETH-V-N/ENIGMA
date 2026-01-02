@@ -101,15 +101,15 @@ admin.on("connection",(ws)=>{
      if(msg.type==="cs"){
       if(msg.data==="lobby"){
         console.log(lobby);
-        broadcast_to_user(lobby);
+        broadcast_to_user(lobby,"lobby");
       }
       if(msg.data==="round1"){
         console.log(r1);
-        broadcast_to_user(r1);
+        broadcast_to_user(r1,"r1");
       }
       if(msg.data==="round2"){
         console.log(r2);
-        broadcast_to_user(r2);
+        broadcast_to_user(r2,"r2");
       }
       console.log(msg);
      }
@@ -156,9 +156,9 @@ userWss.on("connection", (ws, req) => {
   });
 });
 
-function broadcast_to_user(htmlContent) {
+function broadcast_to_user(htmlContent,f) {
   currentGlobalHTML = htmlContent; // Save state for new joiners
-  const payload = JSON.stringify({ type: "UPDATE_CONTENT", html: htmlContent });
+  const payload = JSON.stringify({ type: "UPDATE_CONTENT", html: htmlContent ,screen:f});
   
   userWss.clients.forEach(client => {
     if (client.readyState === WebSocket.OPEN) {
@@ -179,11 +179,10 @@ function broadcastToAdmin(data) {
 
 
 beta.listen(4000, () => {
-  console.log("> at https://localhost:4000/");
+  console.log("> at localhost:4000/");
   console.log("> at https://hyper.local:4000/");
 });
 
-const main=openfile("")
 
 function getMainHTML() {
   const layout=openfile("layout.html");
