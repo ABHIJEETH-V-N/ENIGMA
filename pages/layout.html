@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Live Display</title>
+    <title>ENIGMA - Live Display</title>
     <link rel="preload" href="/assets/codex.js" as="script" />
     <link rel="preload" href="/assets/apple.png" />
     <link rel="preload" href="/assets/bg.jpg" />
@@ -16,9 +16,9 @@
       body {
         margin: 0;
         padding: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,sans-serif;
-        background-color: #f0f2f5;
-        color: #1c1e21;
+        font-family: 'JetBrains Mono', 'Fira Code', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background-color: #0a0a0a;
+        color: #e0e0e0;
         height: 100vh;
         overflow: hidden;
       }
@@ -34,7 +34,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.95);
+        background: rgba(0, 0, 0, 0.98);
         color: white;
         display: none;
         flex-direction: column;
@@ -47,18 +47,85 @@
         font-size: 3rem;
         margin-bottom: 10px;
         color: #ff4d4d;
+        text-shadow: 0 0 20px rgba(255, 77, 77, 0.5);
+      }
+      .kicked-overlay p {
+        font-family: monospace;
+      }
+      
+      /* Loading overlay */
+      #loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #0a0a0a;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 8000;
+        transition: opacity 0.5s ease;
+      }
+      
+      .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 3px solid #222;
+        border-top: 3px solid #33ff00;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      .loading-text {
+        color: #33ff00;
+        font-family: monospace;
+        letter-spacing: 2px;
+        animation: pulse 1.5s infinite;
+      }
+      
+      @keyframes pulse {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 1; }
       }
     </style>
   </head>
   <body>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">CONNECTING TO ENIGMA...</div>
+    </div>
+    
     <div id="content-container"></div>
+    
     <div id="kicked" class="kicked-overlay">
-      <h1>ACCESS DENIED</h1>
-      <p id="reason" style="font-size: 1.2rem"></p>
-      <p style="margin-top: 20px; color: #888">
-        Contact system administrator for help.
+      <h1>⚠ ACCESS DENIED</h1>
+      <p id="reason" style="font-size: 1.2rem; color: #ff6666;"></p>
+      <p style="margin-top: 20px; color: #666">
+        Contact system administrator for assistance.
       </p>
     </div>
-        <script src="/assets/codex.js"></script>
+    
+    <script src="/assets/codex.js"></script>
+    <script>
+      // Hide loading overlay once connected
+      const loadingOverlay = document.getElementById('loading-overlay');
+      const originalOnOpen = socket.onopen;
+      socket.onopen = function(e) {
+        if (loadingOverlay) {
+          loadingOverlay.style.opacity = '0';
+          setTimeout(() => loadingOverlay.style.display = 'none', 500);
+        }
+        if (originalOnOpen) originalOnOpen.call(this, e);
+      };
+    </script>
   </body>
 </html>

@@ -1,10 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enigma - Round 1</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Fira+Code:wght@400;700&display=swap');
+        
         :root {
             --bg-color: #0a0a0a;
-            --term-green: #33ff00;
-            --term-glow: #33ff00aa;
-            --term-white: #e0e0e0;
-            --term-dim: #444;
+            --term-green: #00ff41;
+            --term-green-dim: #00aa2a;
+            --term-glow: rgba(0, 255, 65, 0.4);
+            --term-white: #c0c0c0;
+            --term-dim: #333;
+            --term-red: #ff3333;
+            --term-yellow: #ffcc00;
+            --panel-bg: rgba(0, 15, 0, 0.9);
             --font-stack: 'Share Tech Mono', 'Fira Code', monospace;
         }
 
@@ -28,122 +40,57 @@
             position: relative;
         }
 
-        /* Scanline effect */
-        body::after {
-            content: "";
-            position: absolute;
+        /* Matrix Rain Background */
+        .matrix-bg {
+            position: fixed;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: linear-gradient(to bottom,
-                    rgba(255, 255, 255, 0),
-                    rgba(255, 255, 255, 0) 50%,
-                    rgba(0, 0, 0, 0.1) 50%,
-                    rgba(0, 0, 0, 0.1));
-            background-size: 100% 4px;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
-            z-index: 10;
+            z-index: 0;
+            opacity: 0.05;
+            background: linear-gradient(180deg, 
+                transparent 0%, 
+                rgba(0, 255, 65, 0.03) 50%, 
+                transparent 100%
+            );
+        }
+
+        /* Scanline effect */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1000;
         }
 
         /* CRT Flicker */
-        @keyframes flicker {
-            0% {
-                opacity: 0.97;
-            }
-
-            5% {
-                opacity: 0.95;
-            }
-
-            10% {
-                opacity: 0.9;
-            }
-
-            15% {
-                opacity: 0.95;
-            }
-
-            20% {
-                opacity: 0.98;
-            }
-
-            25% {
-                opacity: 0.95;
-            }
-
-            30% {
-                opacity: 0.9;
-            }
-
-            35% { 
-                opacity: 0.96;
-            }
-
-            40% {
-                opacity: 0.98;
-            }
-
-            45% {
-                opacity: 0.95;
-            }
-
-            50% {
-                opacity: 0.99;
-            }
-
-            55% {
-                opacity: 0.93;
-            }
-
-            60% {
-                opacity: 0.9;
-            }
-
-            65% {
-                opacity: 0.96;
-            }
-
-            70% {
-                opacity: 1;
-            }
-
-            75% {
-                opacity: 0.97;
-            }
-
-            80% {
-                opacity: 0.95;
-            }
-
-            85% {
-                opacity: 0.92;
-            }
-
-            90% {
-                opacity: 0.95;
-            }
-
-            95% {
-                opacity: 0.99;
-            }
-
-            100% {
-                opacity: 0.94;
-            }
-        }
-
-        .crt-overlay {
-            position: absolute;
+        .crt-flicker {
+            position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(18, 16, 16, 0.1);
-            opacity: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
-            z-index: 11;
+            z-index: 999;
             animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.97; }
+            50% { opacity: 0.99; }
+            100% { opacity: 0.98; }
         }
 
         /* Container */
@@ -151,456 +98,835 @@
             display: flex;
             flex-direction: column;
             height: 100%;
-            padding: 2rem;
-            max-width: 1600px;
-            margin: 0 auto;
-            width: 100%;
+            padding: 15px;
             z-index: 1;
+            position: relative;
         }
 
         /* Header */
-        header {
-            text-align: center;
-            /* margin-bottom: 2rem; Removed bottom margin here, handled by marquee */
-            /* border-bottom: 2px solid var(--term-dim); Removed border, moved to marquee */
-            padding-bottom: 1rem;
-            position: relative;
-        }
-
-        h1 {
-            font-size: 3rem;
-            text-transform: uppercase;
-            letter-spacing: 0.3rem;
-            text-shadow: 0 0 10px var(--term-glow);
-            margin-bottom: 0.5rem;
-        }
-
-        /* Marquee / Scrolling Subtitle */
-        .marquee-container {
-            width: 100%;
-            overflow: hidden;
-            border-bottom: 2px solid var(--term-dim);
-            /* Moved border here or distinct separator */
-            border-top: 1px solid var(--term-dim);
-            padding: 0.5rem 0;
-            margin-bottom: 2rem;
-            position: relative;
-            background: rgba(0, 5, 0, 0.9);
-            box-shadow: inset 0 0 15px #000;
-            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-        }
-
-        .marquee-track {
+        .header {
             display: flex;
-            gap: 4rem;
-            width: max-content;
-            animation: marquee 30s linear infinite;
-            /* Slow movement */
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: var(--panel-bg);
+            border: 1px solid var(--term-green);
+            border-radius: 4px;
+            margin-bottom: 15px;
+            box-shadow: 0 0 20px var(--term-glow), inset 0 0 30px rgba(0, 255, 65, 0.05);
         }
 
-        /* Pause on hover optional? User didn't ask. */
-
-        .marquee-item {
-            color: var(--term-white);
-            font-size: 1rem;
-            letter-spacing: 0.1rem;
-            text-transform: uppercase;
+        .header-left {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            white-space: nowrap;
+            gap: 20px;
         }
 
-        .warning-symbol {
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: bold;
             color: var(--term-green);
-            font-size: 1.2rem;
-            text-shadow: 0 0 8px var(--term-green);
-            animation: blink-warning 2s infinite;
+            text-shadow: 0 0 10px var(--term-glow);
+            letter-spacing: 3px;
         }
 
-        @keyframes marquee {
-            0% {
-                transform: translateX(0);
-            }
-
-            100% {
-                transform: translateX(-50%);
-            }
-
-            /* Ensure content is doubled so -50% is a seamless loop point */
+        .header-clock {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: var(--term-green);
+            text-shadow: 0 0 10px var(--term-glow);
+            padding: 5px 15px;
+            border: 1px solid var(--term-dim);
+            background: rgba(0, 0, 0, 0.5);
         }
 
-        @keyframes blink-warning {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.5;
-            }
+        .round-badge {
+            background: var(--term-green);
+            color: #000;
+            padding: 5px 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            letter-spacing: 2px;
         }
 
-        /* Main Layout */
-        main {
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .score-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .score-label {
+            color: var(--term-dim);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .score-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--term-green);
+            text-shadow: 0 0 15px var(--term-glow);
+            min-width: 60px;
+            text-align: right;
+        }
+
+        .question-nav {
+            display: flex;
+            gap: 8px;
+        }
+
+        .q-btn {
+            width: 40px;
+            height: 40px;
+            background: transparent;
+            border: 1px solid var(--term-green);
+            color: var(--term-green);
+            font-family: var(--font-stack);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .q-btn:hover {
+            background: var(--term-green);
+            color: #000;
+            box-shadow: 0 0 15px var(--term-glow);
+        }
+
+        .q-btn.active {
+            background: var(--term-green);
+            color: #000;
+        }
+
+        .q-btn.completed {
+            border-color: var(--term-yellow);
+            color: var(--term-yellow);
+        }
+
+        .q-btn.completed.active {
+            background: var(--term-yellow);
+            color: #000;
+        }
+
+        /* Main Content */
+        .main-content {
             display: flex;
             flex: 1;
-            gap: 2rem;
-            overflow: hidden;
-            /* Prevent body scroll */
+            gap: 15px;
+            min-height: 0;
         }
 
-        /* Panels common styles */
+        /* Panels */
         .panel {
             flex: 1;
-            border: 1px solid var(--term-green);
-            background: rgba(0, 20, 0, 0.3);
             display: flex;
             flex-direction: column;
+            border: 1px solid var(--term-green);
+            background: var(--panel-bg);
+            box-shadow: 0 0 20px var(--term-glow), inset 0 0 50px rgba(0, 255, 65, 0.03);
             position: relative;
-            box-shadow: 0 0 15px rgba(51, 255, 0, 0.1);
-            -webkit-backdrop-filter: blur(2px);
-            backdrop-filter: blur(2px);
-            transition: box-shadow 0.3s ease;
+            overflow: hidden;
         }
 
-        .panel:hover {
-            box-shadow: 0 0 20px rgba(51, 255, 0, 0.2);
-            border-color: #55ff55;
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--term-green), transparent);
         }
 
         .panel-header {
-            background-color: var(--term-green);
-            color: black;
-            padding: 0.5rem 1rem;
+            background: linear-gradient(90deg, var(--term-green) 0%, var(--term-green-dim) 100%);
+            color: #000;
+            padding: 10px 15px;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
+            letter-spacing: 2px;
             display: flex;
             justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-tag {
+            font-size: 0.7rem;    
+            opacity: 0.7;
         }
 
         .panel-content {
             flex: 1;
-            padding: 1.5rem;
+            padding: 20px;
             overflow-y: auto;
-            font-size: 1.1rem;
-            line-height: 1.6;
+            position: relative;
         }
 
-        /* Left Panel - Static Text */
-        #instructions-text {
-            white-space: pre-wrap;
+        /* Target Result Display */
+        .target-label {
+            color: var(--term-dim);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .target-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--term-dim);
+        }
+
+        .target-result {
             color: var(--term-white);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-left: 3px solid var(--term-green);
+            margin-bottom: 20px;
+            position: relative;
         }
 
-        .cursor-block {
+        .target-result::before {
+            content: '"';
+            position: absolute;
+            top: 5px;
+            left: 10px;
+            font-size: 3rem;
+            color: var(--term-green);
+            opacity: 0.2;
+        }
+
+        .typing-cursor {
             display: inline-block;
             width: 10px;
             height: 1.2em;
-            background-color: var(--term-green);
-            vertical-align: text-bottom;
+            background: var(--term-green);
             animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+            margin-left: 2px;
         }
 
         @keyframes blink {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0;
-            }
+            50% { opacity: 0; }
         }
 
-        /* Right Panel - Input */
-        .input-panel {
+        /* Input Section */
+        .input-section {
             display: flex;
             flex-direction: column;
+            height: 100%;
         }
 
-        textarea {
+        .input-label {
+            color: var(--term-dim);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        #user-input {
+            flex: 1;
             width: 100%;
-            height: 100%;
-            background: transparent;
-            border: none;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--term-dim);
             color: var(--term-green);
             font-family: var(--font-stack);
-            font-size: 1.1rem;
+            font-size: 1rem;
+            padding: 15px;
             resize: none;
             outline: none;
-            padding: 0;
             line-height: 1.6;
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
 
-        textarea::placeholder {
-            color: rgba(51, 255, 0, 0.3);
+        #user-input:focus {
+            border-color: var(--term-green);
+            box-shadow: 0 0 15px var(--term-glow);
         }
 
-        /* Footer / Button area */
-        .action-area {
-            padding: 1rem;
+        #user-input::placeholder {
+            color: rgba(0, 255, 65, 0.3);
+        }
+
+        /* Action Bar */
+        .action-bar {
+            padding: 15px;
             border-top: 1px solid var(--term-dim);
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
+            background: rgba(0, 0, 0, 0.3);
         }
 
-        .status-line {
-            margin-right: auto;
+        .status-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             font-size: 0.8rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--term-green);
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { box-shadow: 0 0 0 0 var(--term-glow); }
+            50% { box-shadow: 0 0 0 5px transparent; }
+        }
+
+        .char-count {
             color: var(--term-dim);
         }
 
-        button {
+        .submit-btn {
             background: transparent;
+            border: 2px solid var(--term-green);
             color: var(--term-green);
-            border: 1px solid var(--term-green);
-            padding: 0.8rem 2rem;
+            padding: 12px 30px;
             font-family: var(--font-stack);
             font-size: 1rem;
+            font-weight: bold;
             text-transform: uppercase;
+            letter-spacing: 2px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s;
             position: relative;
             overflow: hidden;
         }
 
-        button:hover {
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--term-glow), transparent);
+            transition: left 0.5s;
+        }
+
+        .submit-btn:hover {
             background: var(--term-green);
-            color: black;
-            box-shadow: 0 0 15px var(--term-glow);
+            color: #000;
+            box-shadow: 0 0 30px var(--term-glow);
         }
 
-        button:active {
-            transform: scale(0.98);
+        .submit-btn:hover::before {
+            left: 100%;
         }
 
-        /* Scrollbar Styling */
-        ::-webkit-scrollbar {
-            width: 8px;
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
-        ::-webkit-scrollbar-track {
-            background: #000;
+        /* Score Popup */
+        .score-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: var(--panel-bg);
+            border: 2px solid var(--term-green);
+            padding: 40px 60px;
+            z-index: 2000;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            box-shadow: 0 0 50px var(--term-glow);
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: #225500;
+        .score-popup.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
         }
 
-        ::-webkit-scrollbar-thumb:hover {
+        .popup-title {
+            font-size: 1rem;
+            color: var(--term-dim);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 15px;
+        }
+
+        .popup-score {
+            font-size: 5rem;
+            font-weight: bold;
+            color: var(--term-green);
+            text-shadow: 0 0 30px var(--term-glow);
+            line-height: 1;
+        }
+
+        .popup-reason {
+            margin-top: 20px;
+            color: var(--term-white);
+            font-size: 0.9rem;
+            max-width: 300px;
+        }
+
+        .popup-close {
+            margin-top: 25px;
+            background: transparent;
+            border: 1px solid var(--term-green);
+            color: var(--term-green);
+            padding: 10px 25px;
+            font-family: var(--font-stack);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .popup-close:hover {
             background: var(--term-green);
+            color: #000;
         }
 
-        /* Mobile Responsiveness */
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Leaderboard Panel */
+        .leaderboard-toggle {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--term-green);
+            color: #000;
+            padding: 15px 8px;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 0.8rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s;
+        }
+
+        .leaderboard-toggle:hover {
+            padding-right: 15px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--term-green-dim); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--term-green); }
+
+        /* Mobile */
         @media (max-width: 768px) {
-            body {
-                height: auto;
-                min-height: 100vh;
-                overflow-y: auto;
-                /* Enable page scrolling */
-                overflow-x: hidden;
-            }
-
-            .app-container {
-                padding: 1rem;
-                height: auto;
-                overflow: visible;
-            }
-
-            main {
+            .main-content {
                 flex-direction: column;
-                height: auto;
-                gap: 2rem;
             }
-
-            .panel {
-                /* Use viewport-relative height for mobile to ensure usability */
-                height: 50vh;
-                min-height: 300px;
-                flex: none;
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .header-right {
                 width: 100%;
-            }
-
-            h1 {
-                font-size: 2rem;
-                letter-spacing: 0.1rem;
-            }
-
-            /* Adjust header for mobile */
-            header {
-                margin-bottom: 1rem;
-                padding-bottom: 0.5rem;
+                justify-content: space-between;
             }
         }
     </style>
 </head>
-
 <body>
 
-    <div class="crt-overlay"></div>
+    <div class="matrix-bg"></div>
+    <div class="scanlines"></div>
+    <div class="crt-flicker"></div>
 
     <div class="app-container">
-        <header>
-            <h1>Enigma</h1>
-        </header>
-
-        <!-- Scrolling Subtitle Section -->
-        <div class="marquee-container">
-            <div class="marquee-track">
-                <!-- Content repeated enough times to ensure seamless loop (at least 2 full widths) -->
-                <!-- Set 1 -->
-
-                <div class="marquee-item"><span class="warning-symbol">⚠</span> WARNING! </div>
-                  <div class="marquee-item"><span class="warning-symbol">⚠</span> WARNING! </div>
-                    <div class="marquee-item"><span class="warning-symbol">⚠</span> WARNING! </div>
-                      <div class="marquee-item"><span class="warning-symbol">⚠</span> WARNING! </div>
-                        <div class="marquee-item"><span class="warning-symbol">⚠</span> WARNING! </div>
-                          <div class="marquee-item"><span class="warning-symbol">⚠</span> WARNING! </div>
-              
-
-                <!-- Set 2 and 3 removed as requested -->
+        <div class="header">
+            <div class="header-left">
+                <div class="logo">ENIGMA</div>
+                <div class="round-badge">ROUND 1 // TEXT</div>
+                <div class="header-clock" id="headerClock">00:00:00</div>
+            </div>
+            <div class="header-right">
+                <div class="question-nav" id="question-nav">
+                    <button class="q-btn active" data-q="1">Q1</button>
+                    <button class="q-btn" data-q="2">Q2</button>
+                    <button class="q-btn" data-q="3">Q3</button>
+                </div>
+                <div class="score-display">
+                    <span class="score-label">SCORE</span>
+                    <span class="score-value" id="total-score">0</span>
+                </div>
             </div>
         </div>
 
-        <main>
-            <!-- Left Panel: Instructions -->
-            <section class="panel">
+        <div class="main-content">
+            <!-- Left Panel: Target Result -->
+            <div class="panel">
                 <div class="panel-header">
-                    <span>> System_Message</span>
-                    <span>[READ_ONLY]</span>
-                </div>
-                <div class="panel-content" id="terminal-output">
-                    <!-- Text will be typed here by JS -->
-                    <span id="typewriter-text"></span><span class="cursor-block"></span>
-                </div>
-            </section>
-
-            <!-- Right Panel: Input -->
-            <section class="panel input-panel">
-                <div class="panel-header">
-                    <span>> User_Input</span>
-                    <span>[EDITABLE]</span>
+                    <span>// TARGET_OUTPUT</span>
+                    <span class="panel-tag">[REVERSE_ENGINEER_THIS]</span>
                 </div>
                 <div class="panel-content">
-                    <textarea id="user-input" placeholder="> Enter your solution here..." spellcheck="false"></textarea>
+                    <div class="target-label">AI Generated Result</div>
+                    <div class="target-result" id="target-result">
+                        Loading...
+                    </div>
+                    <div class="target-label" style="margin-top: 30px;">Mission Objective</div>
+                    <div style="color: var(--term-dim); font-size: 0.9rem; line-height: 1.8;">
+                        > Analyze the output above<br>
+                        > Reverse-engineer the original prompt<br>
+                        > Submit your reconstructed prompt<br>
+                        > Maximize similarity score<br>
+                        > You can resubmit to improve
+                    </div>
                 </div>
-                <div class="action-area">
-                    <div class="status-line" id="status-line">Status: WAITING_FOR_INPUT...</div>
-                    <button id="submit-btn" onclick="handleSubmit()">Execute</button>
+            </div>
+
+            <!-- Right Panel: Input -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span>// PROMPT_RECONSTRUCTION</span>
+                    <span class="panel-tag">[YOUR_INPUT]</span>
                 </div>
-            </section>
-        </main>
+                <div class="panel-content">
+                    <div class="input-section">
+                        <div class="input-label">> Enter your reconstructed prompt:</div>
+                        <textarea id="user-input" placeholder="> Analyze the result and craft your prompt here...&#10;> What instructions would generate that output?&#10;> Be specific and detailed..." spellcheck="false"></textarea>
+                    </div>
+                </div>
+                <div class="action-bar">
+                    <div class="status-info">
+                        <div class="status-item">
+                            <div class="status-dot"></div>
+                            <span>CONNECTED</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="char-count"><span id="char-count">0</span> chars</span>
+                        </div>
+                        <div class="status-item">
+                            <span>Q<span id="current-q">1</span> Score: <span id="q-score">--</span></span>
+                        </div>
+                    </div>
+                    <button class="submit-btn" id="submit-btn" onclick="submitAnswer()">
+                        TRANSMIT
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <!-- Score Popup -->
+    <div class="overlay" id="overlay"></div>
+    <div class="score-popup" id="score-popup">
+        <div class="popup-title">Similarity Score</div>
+        <div class="popup-score" id="popup-score">0</div>
+        <div class="popup-reason" id="popup-reason"></div>
+        <button class="popup-close" onclick="closePopup()">CONTINUE</button>
+    </div>
+
+    <div class="leaderboard-toggle" onclick="requestLeaderboard('r1')">LEADERBOARD</div>
+
     <script>
-        // Configuration
-        const instructionText = `A futuristic university campus with modern buildings and flying drones, wide-angle view with sunset lighting in a sci-fi theme.`;
+    (function() {
+        // ============ SECURE DATA STORE ============
+        // Questions data - ONLY results, NO prompts exposed to client
+        const questionResults = {
+            1: "Mira found an abandoned rooftop in her apartment building and decided to grow flowers there. She had no gardening experience, and at first the plants barely survived the sun and wind. Every day, she carefully tended them, adjusting the soil and watering in small amounts. Slowly, the rooftop bloomed with colors, attracting birds and even the neighbors' attention. By the end of the season, Mira realized that her small, hidden effort had created a tiny oasis of beauty and happiness for herself and the community.",
+            2: "The past knocks softly at random hours,\nAsking to be remembered, not relived.\nMemories blur truth with longing,\nPainting regret in gentle colors.\nLetting go does not erase history,\nIt simply loosens its grip.",
+            3: "Aisha: You always say you're listening, but you decide before I finish speaking.\nRahul: I listen—I just don't always agree.\nAisha: Disagreement isn't the issue. It's how quickly my words stop mattering.\nRahul: If I pause every time, nothing moves forward.\nAisha: Moving forward shouldn't mean being unheard.\nRahul: I'm trying to be practical, not dismissive.\nAisha: Then practicality shouldn't feel like silence to the other person.\nRahul: Maybe efficiency and empathy aren't as compatible as we pretend."
+        };
 
-        // Typewriter Effect
-        const typeWriterElement = document.getElementById('typewriter-text');
-        const speed = 20; // ms per char
-        let i = 0;
+        // ============ STATE ============
+        let currentQuestion = 1;
+        let scores = { 1: null, 2: null, 3: null };
+        let totalScore = 0;
 
-        function typeWriter() {
-            if (i < instructionText.length) {
-                typeWriterElement.textContent += instructionText.charAt(i);
-                i++;
-                // Scroll to bottom
-                const panelContent = typeWriterElement.parentElement;
-                panelContent.scrollTop = panelContent.scrollHeight;
-                setTimeout(typeWriter, speed);
+        // ============ DOM ELEMENTS ============
+        const targetResult = document.getElementById('target-result');
+        const userInput = document.getElementById('user-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const totalScoreEl = document.getElementById('total-score');
+        const charCount = document.getElementById('char-count');
+        const currentQEl = document.getElementById('current-q');
+        const qScoreEl = document.getElementById('q-score');
+        const questionNav = document.getElementById('question-nav');
+        const overlay = document.getElementById('overlay');
+        const scorePopup = document.getElementById('score-popup');
+        const popupScore = document.getElementById('popup-score');
+        const popupReason = document.getElementById('popup-reason');
+
+        // ============ INITIALIZATION ============
+        function init() {
+            loadQuestion(1);
+            setupEventListeners();
+            loadSavedScores();
+            updateClock();
+            setInterval(updateClock, 1000);
+        }
+
+        function updateClock() {
+            const clockEl = document.getElementById('headerClock');
+            if (clockEl) {
+                clockEl.textContent = new Date().toTimeString().split(' ')[0];
             }
         }
 
-        // Start typing on load
-        window.addEventListener('load', () => {
-            setTimeout(typeWriter, 500);
-
-            // Focus textarea on load?? Maybe not to allow reading first.
-            // But let's set focus when they click anywhere in the right panel
-            const inputPanel = document.querySelector('.input-panel');
-            inputPanel.addEventListener('click', () => {
-                document.getElementById('user-input').focus();
+        function setupEventListeners() {
+            // Question navigation
+            questionNav.querySelectorAll('.q-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const q = parseInt(btn.dataset.q);
+                    loadQuestion(q);
+                });
             });
-        });
 
-        // Submit Logic
-        function handleSubmit() {
-            const input = document.getElementById('user-input');
-            const btn = document.getElementById('submit-btn');
-            const statusLine = document.getElementById('status-line');
-            const val = input.value.trim();
+            // Character count
+            userInput.addEventListener('input', () => {
+                charCount.textContent = userInput.value.length;
+            });
 
-            if (!val) {
-                statusLine.textContent = "Status: ERROR [EMPTY_INPUT]";
-                statusLine.style.color = "red";
-                setTimeout(() => {
-                    statusLine.textContent = "Status: WAITING_FOR_INPUT...";
-                    statusLine.style.color = "var(--term-dim)";
-                }, 2000);
+            // Ctrl+Enter to submit
+            userInput.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    submitAnswer();
+                }
+            });
+
+            // Security: Prevent paste of scripts
+            userInput.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+                // Sanitize: remove any script tags or suspicious content
+                const sanitized = text.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                                      .replace(/javascript:/gi, '')
+                                      .replace(/on\w+=/gi, '');
+                document.execCommand('insertText', false, sanitized);
+            });
+        }
+
+        // ============ QUESTION LOADING ============
+        function loadQuestion(qNum) {
+            currentQuestion = qNum;
+            
+            // Update UI
+            questionNav.querySelectorAll('.q-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (parseInt(btn.dataset.q) === qNum) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Display result with typewriter effect
+            const result = questionResults[qNum];
+            typewriterEffect(targetResult, result);
+
+            // Update current question display
+            currentQEl.textContent = qNum;
+            qScoreEl.textContent = scores[qNum] !== null ? scores[qNum] : '--';
+
+            // Clear input
+            userInput.value = '';
+            charCount.textContent = '0';
+            userInput.focus();
+        }
+
+        function typewriterEffect(element, text) {
+            element.innerHTML = '';
+            let i = 0;
+            const cursor = document.createElement('span');
+            cursor.className = 'typing-cursor';
+            
+            function type() {
+                if (i < text.length) {
+                    element.textContent = text.substring(0, i + 1);
+                    element.appendChild(cursor);
+                    i++;
+                    setTimeout(type, 10);
+                } else {
+                    cursor.remove();
+                }
+            }
+            type();
+        }
+
+        // ============ SUBMISSION ============
+        window.submitAnswer = function() {
+            const submission = userInput.value.trim();
+            
+            if (!submission) {
+                showNotification('ERROR: Empty submission detected', 'error');
                 return;
             }
 
-            // Simulate processing
-            statusLine.textContent = "Status: PROCESSING...";
-            btn.innerHTML = "Submitting...";
-            btn.disabled = true;
-            input.disabled = true;
+            if (submission.length < 10) {
+                showNotification('ERROR: Submission too short', 'error');
+                return;
+            }
 
-            setTimeout(() => {
-                // Here is where you'd validate the answer or send to server
-                // For demo, we just reset or show success
+            // Disable button during submission
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'PROCESSING...';
 
-                // Demo success/fail logic (Just for visual)
-                const isCorrect = val.toLowerCase() === "some answer";
-                // Note: User didn't ask for real validation logic, just UI.
+            // Send via WebSocket (socket is defined in codex.js)
+            if (typeof socket !== 'undefined' && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({
+                    type: 'SUBMIT',
+                    round: 'r1',
+                    qno: currentQuestion,
+                    submission: submission
+                }));
+            } else {
+                showNotification('ERROR: Connection lost', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'TRANSMIT';
+            }
+        };
 
-                statusLine.textContent = "Status: DATA_SENT_SUCCESSFULLY";
-                statusLine.style.color = "var(--term-green)";
+        // ============ SCORE HANDLING ============
+        window.handleR1Score = function(qno, score, reason) {
+            scores[qno] = score;
+            
+            // Update question button
+            const btn = questionNav.querySelector(`[data-q="${qno}"]`);
+            if (btn) btn.classList.add('completed');
 
-                btn.innerHTML = "Execute_Sequence";
-                btn.disabled = false;
-                input.disabled = false;
-                input.value = "";
-                input.focus();
+            // Calculate total
+            totalScore = Object.values(scores).filter(s => s !== null).reduce((a, b) => a + b, 0);
+            totalScoreEl.textContent = totalScore;
 
-                alert("COMMAND RECEIVED.\nSolution: " + val + "\n\n(Submitted to Enigma.)");
+            // Update current Q score
+            if (qno === currentQuestion) {
+                qScoreEl.textContent = score;
+            }
 
-                setTimeout(() => {
-                    statusLine.textContent = "Status: WAITING_FOR_INPUT...";
-                    statusLine.style.color = "var(--term-dim)";
-                }, 3000);
+            // Show popup
+            showScorePopup(score, reason);
 
-            }, 1000);
+            // Save to localStorage
+            saveScores();
+
+            // Re-enable button
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'TRANSMIT';
+        };
+
+        function showScorePopup(score, reason) {
+            popupScore.textContent = score;
+            popupReason.textContent = reason || 'Evaluation complete.';
+            overlay.classList.add('show');
+            scorePopup.classList.add('show');
+
+            // Animate score
+            let displayScore = 0;
+            const increment = score / 30;
+            const counter = setInterval(() => {
+                displayScore += increment;
+                if (displayScore >= score) {
+                    displayScore = score;
+                    clearInterval(counter);
+                }
+                popupScore.textContent = Math.round(displayScore);
+            }, 20);
         }
 
-        // Add support for Ctrl+Enter to submit
-        document.getElementById('user-input').addEventListener('keydown', function (e) {
-            if (e.ctrlKey && e.key === 'Enter') {
-                handleSubmit();
-            }
-        });
+        window.closePopup = function() {
+            overlay.classList.remove('show');
+            scorePopup.classList.remove('show');
+        };
 
-        // Typing status effect
-        let typingTimer;
-        const userInputBox = document.getElementById('user-input');
-        const statusLabel = document.getElementById('status-line');
+        // ============ PERSISTENCE ============
+        function saveScores() {
+            try {
+                sessionStorage.setItem('enigma_r1_scores', JSON.stringify(scores));
+            } catch(e) {}
+        }
 
-        userInputBox.addEventListener('input', () => {
-            statusLabel.textContent = "Status: TYPING...";
-            statusLabel.style.color = "var(--term-white)";
+        function loadSavedScores() {
+            try {
+                const saved = sessionStorage.getItem('enigma_r1_scores');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    scores = { ...scores, ...parsed };
+                    
+                    // Update UI
+                    Object.entries(scores).forEach(([q, score]) => {
+                        if (score !== null) {
+                            const btn = questionNav.querySelector(`[data-q="${q}"]`);
+                            if (btn) btn.classList.add('completed');
+                        }
+                    });
 
-            clearTimeout(typingTimer);
-            typingTimer = setTimeout(() => {
-                statusLabel.textContent = "Status: WAITING_FOR_INPUT...";
-                statusLabel.style.color = "var(--term-dim)";
-            }, 800);
-        });
+                    totalScore = Object.values(scores).filter(s => s !== null).reduce((a, b) => a + b, 0);
+                    totalScoreEl.textContent = totalScore;
+                    qScoreEl.textContent = scores[1] !== null ? scores[1] : '--';
+                }
+            } catch(e) {}
+        }
 
+        // ============ NOTIFICATIONS ============
+        function showNotification(message, type = 'info') {
+            const notif = document.createElement('div');
+            notif.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 15px 30px;
+                background: ${type === 'error' ? '#330000' : '#003300'};
+                border: 1px solid ${type === 'error' ? '#ff3333' : '#00ff41'};
+                color: ${type === 'error' ? '#ff3333' : '#00ff41'};
+                font-family: var(--font-stack);
+                z-index: 3000;
+                animation: slideDown 0.3s ease;
+            `;
+            notif.textContent = message;
+            document.body.appendChild(notif);
+            setTimeout(() => notif.remove(), 3000);
+        }
+
+        // Initialize
+        init();
+    })();
     </script>
+</body>
+</html>

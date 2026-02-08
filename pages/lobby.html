@@ -1,550 +1,675 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENIGMA - Lobby</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
+
         :root {
-            --bg: #051005;
-            --cyan: #33ff00;
-            --purple: #1a8000;
-            --green: #33ff00;
-            --text: #ccffcc;
-            --glass: rgba(5, 20, 5, 0.9);
-            --mono: 'JetBrains Mono', monospace;
-            --disp: 'Rajdhani', sans-serif;
+            --bg-dark: #000a00;
+            --bg-panel: rgba(0, 20, 0, 0.85);
+            --neon-green: #00ff41;
+            --neon-green-dim: #00aa2a;
+            --neon-cyan: #00ffff;
+            --neon-glow: 0 0 10px #00ff41, 0 0 20px #00ff41, 0 0 40px #00ff41;
+            --text-bright: #e0ffe0;
+            --text-dim: #3a6a3a;
+            --border-glow: #00ff41;
+            --font-display: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+            --font-mono: 'Share Tech Mono', monospace;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: var(--mono);
-            height: 100vh;
+            background: var(--bg-dark);
+            min-height: 100vh;
+            font-family: var(--font-body);
+            color: var(--text-bright);
             overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .bg-grid {
-            position: absolute;
-            inset: 0;
-            width: 200%;
-            height: 200%;
-            background-image: linear-gradient(rgba(51, 255, 0, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(51, 255, 0, 0.03) 1px, transparent 1px);
-            background-size: 80px 80px;
-            transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
-            animation: grid 20s linear infinite;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        @keyframes grid {
-            0% {
-                transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px);
-            }
-
-            100% {
-                transform: perspective(500px) rotateX(60deg) translateY(80px) translateZ(-200px);
-            }
-        }
-
-        .particles,
-        .scanlines {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-        }
-
-        .scanlines {
-            background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.1) 50%);
-            background-size: 100% 6px;
-            z-index: 10;
-        }
-
-        .particle {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: var(--cyan);
-            opacity: 0.5;
-            animation: float linear infinite;
-        }
-
-        @keyframes float {
-            from {
-                transform: translateY(100vh);
-                opacity: 0;
-            }
-
-            50% {
-                opacity: 0.8;
-            }
-
-            to {
-                transform: translateY(-10vh);
-                opacity: 0;
-            }
-        }
-
-        .terminal-window {
-            width: 90%;
-            max-width: 900px;
-            height: 70vh;
-            background: var(--glass);
-            border: 1px solid rgba(51, 255, 0, 0.3);
-            border-radius: 12px;
-            box-shadow: 0 0 30px rgba(51, 255, 0, 0.1), inset 0 0 20px rgba(0, 0, 0, 0.5);
-            display: flex;
-            flex-direction: column;
-            -webkit-backdrop-filter: blur(10px);
-            backdrop-filter: blur(10px);
-            z-index: 2;
-            animation: glow 4s infinite alternate;
             position: relative;
         }
 
-        @keyframes glow {
-            from {
-                box-shadow: 0 0 20px rgba(51, 255, 0, 0.1);
-                border-color: rgba(51, 255, 0, 0.3);
-            }
-
-            to {
-                box-shadow: 0 0 35px rgba(51, 255, 0, 0.2);
-                border-color: rgba(51, 255, 0, 0.5);
-            }
+        /* Animated Grid Background */
+        .grid-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(0,255,65,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,65,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            z-index: 0;
         }
 
-        .terminal-header {
-            height: 40px;
-            background: rgba(255, 255, 255, 0.05);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        @keyframes gridMove {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
+        }
+
+        /* Scanlines */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0,0,0,0.1) 0px,
+                rgba(0,0,0,0.1) 1px,
+                transparent 1px,
+                transparent 3px
+            );
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* CRT Flicker - subtle effect */
+        .crt-flicker {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.015;
+            background: rgba(255,255,255,0.5);
+            animation: none; /* Disabled to prevent flickering */
+        }
+
+        /* Main Container */
+        .main-container {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: linear-gradient(90deg, transparent, var(--bg-panel), transparent);
+            border-bottom: 2px solid var(--neon-green);
+            box-shadow: 0 2px 20px rgba(0,255,65,0.3);
+            position: relative;
+        }
+
+        .top-bar::before, .top-bar::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            width: 30px;
+            height: 2px;
+            background: var(--neon-cyan);
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+        .top-bar::before { left: 0; }
+        .top-bar::after { right: 0; }
+
+        .status-left, .status-right {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 0 1rem;
+            gap: 20px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--neon-green);
         }
 
-        .window-controls {
+        .clock {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px var(--neon-cyan);
+            letter-spacing: 2px;
+        }
+
+        .online-indicator {
             display: flex;
+            align-items: center;
             gap: 8px;
         }
 
-        .control {
-            width: 12px;
-            height: 12px;
+        .pulse-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--neon-green);
             border-radius: 50%;
-        }
-
-        .close {
-            background: #ff5f56;
-        }
-
-        .minimize {
-            background: #ffbd2e;
-        }
-
-        .maximize {
-            background: #27c93f;
-        }
-
-        .terminal-title {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.5);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .status-badge {
-            font-size: 0.7rem;
-            color: var(--green);
-            background: rgba(0, 255, 102, 0.1);
-            padding: 2px 8px;
-            border-radius: 4px;
-            border: 1px solid rgba(0, 255, 102, 0.3);
+            box-shadow: var(--neon-glow);
             animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
-
-            0%,
-            100% {
-                box-shadow: 0 0 0 6px rgba(0, 255, 102, 0);
-            }
-
-            50% {
-                box-shadow: 0 0 0 0 rgba(0, 255, 102, 0.4);
-            }
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.7; }
         }
 
-        .terminal-body {
+        /* Center Content */
+        .center-content {
             flex: 1;
-            padding: 2rem;
-            overflow-y: auto;
-            font-size: 1rem;
-            line-height: 1.6;
-            color: var(--cyan);
-            text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
             display: flex;
             flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
         }
 
-        .log-line {
-            margin-bottom: 0.5rem;
-            opacity: 0;
-            animation: fade 0.2s forwards;
-            display: flex;
-        }
-
-        .log-prefix {
-            color: var(--purple);
-            margin-right: 10px;
-        }
-
-        @keyframes fade {
-            to {
-                opacity: 1;
-            }
-        }
-
-        .enigma-logo {
-            font-family: var(--disp);
-            font-weight: 900;
-            font-size: 5rem;
-            color: #fff;
+        /* Logo Section */
+        .logo-section {
             text-align: center;
-            margin: 2rem 0;
-            letter-spacing: 0.5rem;
+            margin-bottom: 40px;
+        }
+
+        .logo-image {
+            max-width: 400px;
+            height: auto;
+            filter: drop-shadow(0 0 30px rgba(0,255,65,0.5));
+            animation: logoGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes logoGlow {
+            0%, 100% { filter: drop-shadow(0 0 30px rgba(0,255,65,0.5)); }
+            50% { filter: drop-shadow(0 0 50px rgba(0,255,65,0.8)) drop-shadow(0 0 80px rgba(0,255,65,0.4)); }
+        }
+
+        .subtitle {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            letter-spacing: 8px;
             text-transform: uppercase;
-            position: relative;
-            display: none;
-            transform: scale(0.9);
-            text-shadow: 0 0 10px var(--cyan), 0 0 20px var(--cyan), 0 0 40px var(--purple);
+            margin-top: 15px;
         }
 
-        .enigma-logo::before,
-        .enigma-logo::after {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
+        /* Mode Card - Gaming Style */
+        .mode-card {
             width: 100%;
-            height: 100%;
-            background: transparent;
+            max-width: 500px;
+            background: var(--bg-panel);
+            border: 2px solid var(--neon-green);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,255,65,0.2), inset 0 0 30px rgba(0,255,65,0.05);
+            margin-bottom: 30px;
         }
 
-        .enigma-logo::before {
-            left: 2px;
-            text-shadow: -1px 0 var(--purple);
-            clip: rect(24px, 550px, 90px, 0);
-            animation: gl1 3s infinite linear alternate-reverse;
-        }
-
-        .enigma-logo::after {
-            left: -2px;
-            text-shadow: -1px 0 var(--green);
-            clip: rect(85px, 550px, 140px, 0);
-            animation: gl2 2.5s infinite linear alternate-reverse;
-        }
-
-        .enigma-logo.show {
-            display: block;
-            animation: reveal 0.8s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes reveal {
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        @keyframes gl1 {
-            0% {
-                clip: rect(65px, 999px, 100px, 0);
-            }
-
-            20% {
-                clip: rect(4px, 999px, 25px, 0);
-            }
-
-            40% {
-                clip: rect(93px, 999px, 45px, 0);
-            }
-
-            60% {
-                clip: rect(15px, 999px, 12px, 0);
-            }
-
-            80% {
-                clip: rect(54px, 999px, 110px, 0);
-            }
-
-            100% {
-                clip: rect(11px, 999px, 55px, 0);
-            }
-        }
-
-        @keyframes gl2 {
-            0% {
-                clip: rect(14px, 999px, 86px, 0);
-            }
-
-            20% {
-                clip: rect(82px, 999px, 15px, 0);
-            }
-
-            40% {
-                clip: rect(32px, 999px, 5px, 0);
-            }
-
-            60% {
-                clip: rect(74px, 999px, 56px, 0);
-            }
-
-            80% {
-                clip: rect(41px, 999px, 128px, 0);
-            }
-
-            100% {
-                clip: rect(12px, 999px, 63px, 0);
-            }
-        }
-
-        .final-status {
-            text-align: center;
-            margin-top: 1rem;
-            color: var(--text);
-            font-size: 1.2rem;
-            opacity: 0;
-        }
-
-        .final-status.show {
-            animation: fade 1s 0.5s forwards;
-        }
-
-        .cursor {
-            display: inline-block;
-            width: 10px;
-            height: 1.2em;
-            background: var(--cyan);
-            animation: blink 1s step-end infinite;
-            margin-left: 5px;
-            vertical-align: middle;
-        }
-
-        @keyframes blink {
-            50% {
-                opacity: 0;
-            }
-        }
-
-        .terminal-footer {
-            padding: 1rem 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        .mode-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.6);
-            background: rgba(0, 0, 0, 0.2);
+            padding: 12px 20px;
+            background: rgba(0,255,65,0.1);
+            border-bottom: 1px solid var(--neon-green);
         }
 
-        .rotating-text {
-            height: 1.2em;
-            overflow: hidden;
+        .mode-title {
+            font-family: var(--font-mono);
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+        }
+
+        .mode-icon {
+            color: var(--neon-green);
+        }
+
+        .mode-content {
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(0,80,0,0.3), transparent);
+            position: relative;
+            min-height: 120px;
+        }
+
+        .mode-content::before {
+            content: 'ENIGMA';
+            position: absolute;
+            font-family: var(--font-display);
+            font-size: 4rem;
+            font-weight: 900;
+            color: rgba(0,255,65,0.1);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            letter-spacing: 10px;
+        }
+
+        .mode-info {
+            position: relative;
+            z-index: 1;
+        }
+
+        .mode-name {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--neon-green);
+            text-shadow: var(--neon-glow);
+            margin-bottom: 8px;
+        }
+
+        .mode-desc {
+            font-family: var(--font-body);
+            color: var(--text-bright);
+            font-size: 1rem;
+        }
+
+        /* User Welcome Box */
+        .user-box {
+            width: 100%;
+            max-width: 500px;
+            background: var(--bg-panel);
+            border: 1px solid var(--neon-green);
+            border-radius: 4px;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .user-box::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--neon-cyan);
+            box-shadow: 0 0 15px var(--neon-cyan);
+        }
+
+        .user-info h3 {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            color: var(--neon-green);
+            text-shadow: 0 0 10px rgba(0,255,65,0.5);
+        }
+
+        .user-info span {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--neon-cyan);
+        }
+
+        .user-stats {
             text-align: right;
         }
 
-        .rotator {
-            display: flex;
-            flex-direction: column;
-            animation: rot 9s infinite cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        .stat-value {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            color: var(--neon-green);
+            text-shadow: var(--neon-glow);
         }
 
-        .rotator div {
-            height: 1.2em;
-            color: var(--purple);
-            font-weight: bold;
-        }
-
-        @keyframes rot {
-
-            0%,
-            30% {
-                transform: translateY(0);
-            }
-
-            33%,
-            63% {
-                transform: translateY(-1.2em);
-            }
-
-            66%,
-            96% {
-                transform: translateY(-2.4em);
-            }
-
-            100% {
-                transform: translateY(0);
-            }
-        }
-
-        .loader-container {
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            margin: 1rem 0;
-            border-radius: 2px;
-            overflow: hidden;
-            display: none;
-        }
-
-        .loader-bar {
-            height: 100%;
-            background: var(--cyan);
-            width: 0%;
-            transition: width 0.3s ease;
-            box-shadow: 0 0 10px var(--cyan);
-        }
-
-        #refresh-warning {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 10, 0, 0.95);
-            z-index: 1000;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            border: 4px solid var(--green);
-            box-shadow: inset 0 0 50px var(--green);
-            pointer-events: none;
-            -webkit-backdrop-filter: blur(5px);
-            backdrop-filter: blur(5px);
-
-            animation: warn 0.5s infinite alternate;
-        }
-
-        @keyframes warn {
-            from {
-                border-color: var(--green);
-                box-shadow: inset 0 0 50px var(--green);
-            }
-
-            to {
-                border-color: #050;
-                box-shadow: inset 0 0 20px #050;
-            }
-        }
-
-        .warning-content {
-            color: var(--green);
-            font-family: var(--mono);
+        .stat-label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-dim);
             text-transform: uppercase;
-            text-shadow: 0 0 10px var(--green);
-            padding: 2rem;
-            background: rgba(0, 20, 0, 0.8);
-            border: 1px solid var(--green);
+            letter-spacing: 2px;
         }
 
-        .warning-icon {
-            font-size: 5rem;
-            display: block;
-            margin-bottom: 1rem;
+        /* Find Match Button */
+        .match-button {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px 40px;
+            background: linear-gradient(180deg, rgba(0,60,0,0.9), rgba(0,30,0,0.9));
+            border: 2px solid var(--neon-green);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
         }
 
-        .warning-title {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
+        .match-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0,255,65,0.2), transparent);
+            animation: shimmer 3s infinite;
         }
 
-        @media (max-width: 768px) {
-            .terminal-window {
-                width: 95%;
-                height: 85vh;
-            }
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
 
-            .enigma-logo {
-                font-size: 2.5rem;
-            }
+        .match-button:hover {
+            box-shadow: 0 0 40px rgba(0,255,65,0.4), inset 0 0 40px rgba(0,255,65,0.1);
+            transform: scale(1.02);
+        }
 
-            .terminal-footer {
-                flex-direction: column;
-                gap: 10px;
-                text-align: center;
-            }
+        .match-button-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-            .rotating-text {
-                text-align: center;
-            }
+        .match-status {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            letter-spacing: 3px;
+        }
+
+        .match-text {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--neon-green);
+            text-shadow: var(--neon-glow);
+            letter-spacing: 5px;
+        }
+
+        .match-subtitle {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+        }
+
+        /* Fun Fact Box */
+        .fact-box {
+            width: 100%;
+            max-width: 500px;
+            margin-top: 30px;
+            padding: 15px 20px;
+            background: rgba(0,255,255,0.05);
+            border-left: 3px solid var(--neon-cyan);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--text-bright);
+            position: relative;
+        }
+
+        .fact-label {
+            font-size: 0.7rem;
+            color: var(--neon-cyan);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        /* Admin Message */
+        .admin-message {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            max-width: 350px;
+            background: var(--bg-panel);
+            border: 2px solid var(--neon-cyan);
+            border-radius: 4px;
+            padding: 20px;
+            display: none;
+            z-index: 500;
+            box-shadow: 0 0 30px rgba(0,255,255,0.3);
+            animation: slideIn 0.5s;
+        }
+
+        .admin-message.show { display: block; }
+
+        .admin-message-header {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--neon-cyan);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0,255,255,0.3);
+        }
+
+        .admin-message-text {
+            font-family: var(--font-body);
+            color: var(--text-bright);
+            line-height: 1.6;
+        }
+
+        .admin-message-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .admin-message-close:hover { color: var(--neon-cyan); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Corner Decorations */
+        .corner-decor {
+            position: fixed;
+            width: 100px;
+            height: 100px;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .corner-decor.tl { top: 0; left: 0; border-top: 3px solid var(--neon-green); border-left: 3px solid var(--neon-green); }
+        .corner-decor.tr { top: 0; right: 0; border-top: 3px solid var(--neon-green); border-right: 3px solid var(--neon-green); }
+        .corner-decor.bl { bottom: 0; left: 0; border-bottom: 3px solid var(--neon-green); border-left: 3px solid var(--neon-green); }
+        .corner-decor.br { bottom: 0; right: 0; border-bottom: 3px solid var(--neon-green); border-right: 3px solid var(--neon-green); }
+
+        /* Bottom Status Bar */
+        .bottom-bar {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            padding: 15px;
+            background: linear-gradient(90deg, transparent, var(--bg-panel), transparent);
+            border-top: 1px solid var(--neon-green);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .bottom-stat {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bottom-stat-value {
+            color: var(--neon-green);
+            font-size: 1rem;
         }
     </style>
-
-    <div class="bg-grid"></div>
-    <div class="particles" id="particles"></div>
+</head>
+<body>
+    <div class="grid-bg"></div>
     <div class="scanlines"></div>
-    <div id="refresh-warning">
-        <div class="warning-content"><span class="warning-icon">⚠</span>
-            <div class="warning-title">SECURITY ALERT</div>
-            <p>> DO NOT REFRESH OR NAVIGATE BACK.</p>
-            <p>> SYSTEM STATE WILL BE LOST.</p>
-            <p>> RETURN TO TERMINAL IMMEDIATELY.</p>
-        </div>
-    </div>
-    <div class="terminal-window">
-        <div class="terminal-header">
-            <div class="window-controls">
-                <div class="control close"></div>
-                <div class="control minimize"></div>
-                <div class="control maximize"></div>
+    <div class="crt-flicker"></div>
+
+    <div class="corner-decor tl"></div>
+    <div class="corner-decor tr"></div>
+    <div class="corner-decor bl"></div>
+    <div class="corner-decor br"></div>
+
+    <div class="main-container">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="status-left">
+                <div class="online-indicator">
+                    <div class="pulse-dot"></div>
+                    <span>ONLINE</span>
+                </div>
+                <span>SESSION ACTIVE</span>
             </div>
-            <div class="terminal-title">Enigma_Core_Terminal // v2.4.0</div>
-            <div class="status-badge">LIVE STATUS: LOBBY OPEN</div>
-        </div>
-        <div class="terminal-body" id="console-output">
-            <div class="loader-container" id="boot-loader">
-                <div class="loader-bar" id="boot-bar"></div>
+            <div class="clock" id="clock">00:00:00</div>
+            <div class="status-right">
+                <span id="playerCount">0 PLAYERS</span>
+                <span>v2.0</span>
             </div>
         </div>
-        <div class="terminal-footer">
-            <div id="clock">00:00:00 UTC</div>
-            <div class="rotating-text">
-                <div class="rotator">
-                    <div>Uploding.....</div>
-                    <div>Think• Decode • Repeat </div>
-                    <div>Recreation starts now.</div>
+
+        <!-- Center Content -->
+        <div class="center-content">
+            <!-- Logo -->
+            <div class="logo-section">
+                <img src="/assets/enigma.png" alt="ENIGMA" class="logo-image" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='block';">
+                <div id="fallback-logo" style="display:none; font-family: var(--font-display); font-size: 4rem; font-weight: 900; color: var(--neon-green); text-shadow: var(--neon-glow); letter-spacing: 15px;">ENIGMA</div>
+                <p class="subtitle">REVERSE PROMPT ENGINEERING</p>
+            </div>
+
+            <!-- Mode Card -->
+            <div class="mode-card">
+                <div class="mode-header">
+                    <span class="mode-title">GAME MODE</span>
+                    <span class="mode-icon">⟳</span>
+                </div>
+                <div class="mode-content">
+                    <div class="mode-info">
+                        <div class="mode-name">COMPETITIVE</div>
+                        <div class="mode-desc">Reverse engineer AI prompts to score points</div>
+                    </div>
                 </div>
             </div>
+
+            <!-- User Box -->
+            <div class="user-box">
+                <div class="user-info">
+                    <h3 id="userName">PARTICIPANT</h3>
+                    <span id="userStatus">✓ AUTHENTICATED</span>
+                </div>
+                <div class="user-stats">
+                    <div class="stat-value" id="statRound">LOBBY</div>
+                    <div class="stat-label">Current Stage</div>
+                </div>
+            </div>
+
+            <!-- Match Button -->
+            <div class="match-button">
+                <div class="match-button-inner">
+                    <div class="match-status">WAITING</div>
+                    <div style="text-align: center;">
+                        <div class="match-text">Please Wait</div>
+                        <div class="match-subtitle">waiting for players</div>
+                    </div>
+                    <div class="match-status">STANDBY</div>
+                </div>
+            </div>
+
+            <!-- Fun Fact -->
+            <div class="fact-box">
+                <div class="fact-label">💡 DID YOU KNOW?</div>
+                <div id="funFact">Loading intel...</div>
+            </div>
+        </div>
+
+        <!-- Bottom Bar -->
+        <div class="bottom-bar">
+            <div class="bottom-stat">
+                <span>PING:</span>
+                <span class="bottom-stat-value" id="ping">--ms</span>
+            </div>
+            <div class="bottom-stat">
+                <span>SERVER:</span>
+                <span class="bottom-stat-value">ENIGMA-CORE</span>
+            </div>
+            <div class="bottom-stat">
+                <span>REGION:</span>
+                <span class="bottom-stat-value">LOCAL</span>
+            </div>
         </div>
     </div>
+
+    <!-- Admin Message -->
+    <div class="admin-message" id="adminMessage">
+        <button class="admin-message-close" onclick="closeAdminMessage()">×</button>
+        <div class="admin-message-header">📡 TRANSMISSION RECEIVED</div>
+        <div class="admin-message-text" id="adminMessageText"></div>
+    </div>
+
     <script>
-        const qs = s => document.querySelector(s), ce = t => document.createElement(t);
-        const pc = qs('#particles'), out = qs('#console-output'), lb = qs('#boot-loader'), bar = qs('#boot-bar'), warn = qs('#refresh-warning');
-        for (let i = 0; i < 50; i++) { let p = ce('div'); p.className = 'particle'; p.style.left = Math.random() * 100 + '%'; p.style.animationDuration = (Math.random() * 3 + 2) + 's'; p.style.animationDelay = (Math.random() * 5) + 's'; pc.appendChild(p); }
-        setInterval(() => qs('#clock').textContent = new Date().toISOString().split('T')[1].split('.')[0] + ' UTC', 1000);
-        const msgs = ["Booting ENIGMA Event Core...", "Loading team environments...", "Initializing challenge modules...", "Syncing Imagers Assets...", "Establishing secure connection...", "Done."];
-        let idx = 0;
-        function type(txt, cb) {
-            let l = ce('div'); l.className = 'log-line'; l.innerHTML = `<span class="log-prefix">></span><span></span>`; out.appendChild(l);
-            let sp = l.lastChild, c = 0, int = setInterval(() => { sp.textContent += txt.charAt(c++); if (c >= txt.length) { clearInterval(int); if (cb) setTimeout(cb, 300); } }, 30);
+        // Clock
+        function updateClock() {
+            const now = new Date();
+            const time = now.toTimeString().split(' ')[0];
+            document.getElementById('clock').textContent = time;
         }
-        function run() {
-            if (idx === 0) lb.style.display = "block";
-            bar.style.width = Math.min(((idx + 1) / msgs.length) * 100, 100) + "%";
-            if (idx < msgs.length) type(msgs[idx++], run);
-            else setTimeout(() => { lb.style.display = "none"; showLogo(); }, 500);
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // Ping simulation
+        setInterval(() => {
+            const ping = Math.floor(Math.random() * 20) + 5;
+            document.getElementById('ping').textContent = ping + 'ms';
+        }, 3000);
+
+        // Fun Facts
+        const funFacts = [
+            "GPT-3 has 175 billion parameters - that's 175,000,000,000 numbers!",
+            "Prompt engineering is now a $300K+ career at top tech companies.",
+            "The ENIGMA machine was used to crack Nazi codes in WWII.",
+            "The first AI artwork sold at auction went for $432,500 in 2018.",
+            "Alan Turing breaked the Enigma code using statistical analysis.",
+            "DALL-E (image model) is named after Salvador Dalí and Pixar's WALL-E.",
+            "calude.ai is named after Claude Shannon, the father of information theory.",
+            "The term 'artificial intelligence' was coined in 1956.",
+            "Modern LLMs can understand and generate 100+ languages.",
+            "Reverse prompt engineering tests your understanding of AI behavior.",
+            "ChatGPT reached 100 million users in just 2 months.",
+            "AI models are trained on datasets with hundreds of gigabytes of text.",
+            "The Transformer architecture revolutionized NLP in 2017.",
+            "Reinforcement learning from human feedback (RLHF) improves AI responses.",         
+        ];
+
+        let factIdx = 0;
+        function cycleFacts() {
+            factIdx = (factIdx + 1) % funFacts.length;
+            const el = document.getElementById('funFact');
+            el.style.opacity = 0;
+            setTimeout(() => {
+                el.textContent = funFacts[factIdx];
+                el.style.opacity = 1;
+            }, 300);
         }
-        function showLogo() {
-            let l = ce('div'); l.className = 'enigma-logo show'; l.textContent = "ENIGMA"; l.setAttribute('data-text', "ENIGMA"); out.appendChild(l);
-            let s = ce('div'); s.className = 'final-status show'; s.innerHTML = ">> Event lobby active — waiting for host to begin <span class='cursor'></span>"; out.appendChild(s);
+        document.getElementById('funFact').textContent = funFacts[Math.floor(Math.random() * funFacts.length)];
+        setInterval(cycleFacts, 8000);
+
+        // Admin Message
+        function showAdminMessage(msg) {
+            document.getElementById('adminMessageText').textContent = msg;
+            document.getElementById('adminMessage').classList.add('show');
         }
-        setTimeout(run, 1000);
-        document.addEventListener('mousemove', e => warn.style.display = (e.clientY < 50) ? 'flex' : 'none');
-        window.addEventListener('beforeunload', e => { e.preventDefault(); e.returnValue = ''; });
+        function closeAdminMessage() {
+            document.getElementById('adminMessage').classList.remove('show');
+        }
+
+        // Message handler
+        window.handleServerMessage = function(data) {
+            if (data.type === 'ADMIN_MESSAGE') showAdminMessage(data.message);
+            if (data.type === 'STATE_SYNC' && data.data) {
+                document.getElementById('playerCount').textContent = (data.data.connectedUsers || 0) + ' PLAYERS';
+                document.getElementById('statRound').textContent = (data.data.currentRound || 'LOBBY').toUpperCase();
+            }
+            if (data.type === 'USER_INFO' && data.name) {
+                document.getElementById('userName').textContent = data.name.toUpperCase();
+            }
+        };
+
+        if (window.userName) document.getElementById('userName').textContent = window.userName.toUpperCase();
     </script>
+</body>
+</html>

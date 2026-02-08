@@ -1,210 +1,906 @@
-  <style>
-     :root {
-        --camo-green: #354230;
-        --heavy-steel: #2b2b2b;
-        --terminal-red: rgba(51,255,0,0.7);
-        --terminal-glow: rgba(51,255,0,0.3);
-        --bakelite: #120d0d;
-        text-shadow: 0 0 10px currentColor; 
-     }
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Fira+Code:wght@400;700&display=swap');
+    
+    :root {
+        --bg-color: #0a0a0a;
+        --term-green: #00ff41;
+        --term-green-dim: #00aa2a;
+        --term-glow: rgba(0, 255, 65, 0.4);
+        --term-cyan: #00ffff;
+        --term-cyan-glow: rgba(0, 255, 255, 0.4);
+        --term-white: #c0c0c0;
+        --term-dim: #333;
+        --term-red: #ff3333;
+        --term-yellow: #ffcc00;
+        --panel-bg: rgba(0, 15, 0, 0.9);
+        --font-stack: 'Share Tech Mono', 'Fira Code', monospace;
+    }
 
-     body {
-        background-color: #0a0a0a;
-        background-image: radial-gradient(circle, #220000 1px, transparent 1px);
-        background-size: 30px 30px;
-        color: var(--terminal-red);
-        font-family: monospace;
+    * {
+        box-sizing: border-box;
         margin: 0;
+        padding: 0;
+        scrollbar-width: thin;
+        scrollbar-color: var(--term-green) var(--bg-color);
+    }
+
+    body {
+        background-color: var(--bg-color);
+        color: var(--term-green);
+        font-family: var(--font-stack);
         height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        width: 100vw;
         overflow: hidden;
-     }
-
-     
-
-     .screen {
-        width: 95vw;
-        height: 92vh;
-        background: #121212;
-        border: 4px solid #333;
-        border-radius: 5px;
-        box-shadow: 0 0 40px #000;
         display: flex;
         flex-direction: column;
-        padding: 15px;
-        box-sizing: border-box;
         position: relative;
-        gap: 15px;
-     }
+    }
 
-     .tabs {
-        background: var(--bakelite);
-        border: 1px solid #444;
-        box-shadow: inset 0 0 15px #000;
-        overflow: hidden;
-        white-space: nowrap;
-        padding: 10px 0;
-        position: relative;
-     }
+    /* Background Effects */
+    .grid-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+        pointer-events: none;
+        z-index: 0;
+    }
 
-     .ticker-wrap {
-        display: inline-block;
-        animation: ticker 10s linear infinite;
-        gap: 0px;
-     }
+    .scanlines {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: repeating-linear-gradient(
+            0deg,
+            rgba(0, 0, 0, 0.1),
+            rgba(0, 0, 0, 0.1) 1px,
+            transparent 1px,
+            transparent 2px
+        );
+        pointer-events: none;
+        z-index: 1000;
+    }
 
-     .ticker-item {
-        display: inline-block;
-        font-weight: bold;
-        font-size: 1.2rem;
-        color: var(--terminal-red);
-        text-shadow: 0 0 8px var(--terminal-red);
-     }
+    .vignette {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.5) 100%);
+        pointer-events: none;
+        z-index: 999;
+    }
 
-     @keyframes ticker {
-        0% { transform: translateX(0); }
-        100% { transform: translateX(-50%); }
-     }
-
-     .main {
+    /* Container */
+    .app-container {
         display: flex;
-        flex: 1; 
-        gap: 20px;
-        min-height: 0; 
-     } 
+        flex-direction: column;
+        height: 100%;
+        padding: 15px;
+        z-index: 1;
+        position: relative;
+    }
 
-     .image-container {
-        flex: 1.2;
+    /* Header */
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        background: var(--panel-bg);
+        border: 1px solid var(--term-cyan);
+        border-radius: 4px;
+        margin-bottom: 15px;
+        box-shadow: 0 0 20px var(--term-cyan-glow), inset 0 0 30px rgba(0, 255, 255, 0.05);
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .logo {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--term-cyan);
+        text-shadow: 0 0 10px var(--term-cyan-glow);
+        letter-spacing: 3px;
+    }
+
+    .header-clock {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1rem;
+        color: var(--term-cyan);
+        text-shadow: 0 0 10px var(--term-cyan-glow);
+        padding: 5px 15px;
+        border: 1px solid var(--term-dim);
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .round-badge {
+        background: var(--term-cyan);
+        color: #000;
+        padding: 5px 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        letter-spacing: 2px;
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 25px;
+    }
+
+    .score-display {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .score-label {
+        color: var(--term-dim);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .score-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: var(--term-cyan);
+        text-shadow: 0 0 15px var(--term-cyan-glow);
+        min-width: 60px;
+        text-align: right;
+    }
+
+    .question-nav {
+        display: flex;
+        gap: 8px;
+    }
+
+    .q-btn {
+        width: 40px;
+        height: 40px;
+        background: transparent;
+        border: 1px solid var(--term-cyan);
+        color: var(--term-cyan);
+        font-family: var(--font-stack);
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .q-btn:hover {
+        background: var(--term-cyan);
+        color: #000;
+        box-shadow: 0 0 15px var(--term-cyan-glow);
+    }
+
+    .q-btn.active {
+        background: var(--term-cyan);
+        color: #000;
+    }
+
+    .q-btn.completed {
+        border-color: var(--term-yellow);
+        color: var(--term-yellow);
+    }
+
+    .q-btn.completed.active {
+        background: var(--term-yellow);
+        color: #000;
+    }
+
+    /* Main Content */
+    .main-content {
+        display: flex;
+        flex: 1;
+        gap: 15px;
+        min-height: 0;
+    }
+
+    /* Panels */
+    .panel {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--term-cyan);
+        background: var(--panel-bg);
+        box-shadow: 0 0 20px var(--term-cyan-glow), inset 0 0 50px rgba(0, 255, 255, 0.03);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .panel.image-panel {
+        flex: 1.3;
+    }
+
+    .panel.input-panel {
+        flex: 1;
+    }
+
+    .panel::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--term-cyan), transparent);
+    }
+
+    .panel-header {
+        background: linear-gradient(90deg, var(--term-cyan) 0%, #008888 100%);
+        color: #000;
+        padding: 10px 15px;
+        font-weight: bold;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .panel-tag {
+        font-size: 0.7rem;
+        opacity: 0.7;
+    }
+
+    .panel-content {
+        flex: 1;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    /* Image Display */
+    .image-container {
+        flex: 1;
         display: flex;
         justify-content: center;
         align-items: center;
         background: #000;
-        border: 2px solid #333;
-        overflow: hidden;
+        border: 2px solid var(--term-dim);
         position: relative;
-     }
+        overflow: hidden;
+        min-height: 0;
+    }
 
-   
-     #displayImage {
+    .image-container::before {
+        content: 'TARGET_IMAGE';
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-size: 0.7rem;
+        color: var(--term-cyan);
+        opacity: 0.5;
+        letter-spacing: 2px;
+    }
+
+    #target-image {
         max-width: 100%;
         max-height: 100%;
         object-fit: contain;
-     }
+        transition: filter 0.3s;
+    }
 
-     .input-column {
-        flex: 1;
+    .image-glitch {
+        animation: glitch 0.3s ease;
+    }
+
+    @keyframes glitch {
+        0% { filter: brightness(3) saturate(0) contrast(2); transform: translate(2px, -2px); }
+        25% { filter: brightness(0.5) saturate(2); transform: translate(-2px, 2px); }
+        50% { filter: invert(1); transform: translate(2px, 2px); }
+        75% { filter: brightness(1.5) hue-rotate(90deg); transform: translate(-2px, -2px); }
+        100% { filter: none; transform: translate(0, 0); }
+    }
+
+    .image-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid var(--term-dim);
+        font-size: 0.8rem;
+    }
+
+    .image-info-item {
+        color: var(--term-dim);
+    }
+
+    .image-info-item span {
+        color: var(--term-cyan);
+    }
+
+    /* Input Section */
+    .input-section {
         display: flex;
         flex-direction: column;
-        gap: 15px;
-        min-height: 0;
-     }
+        height: 100%;
+    }
 
-     #ta {
-        flex: 1;
-        background-color: #080808;
-        border: 2px solid #222;
-        padding: 20px;
-        color: #eee;
-        font-size: 1.1rem;
-        outline: none;
-        box-shadow: inset 0 0 20px #000;
-        overflow-y: auto;
-        word-wrap: break-word;
-        line-break: strict;
-        line-height: 1.5;
-        position: relative;
-     }
+    .input-label {
+        color: var(--term-dim);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 10px;
+    }
 
-     #ta:empty:before {
-        content: "TYPE_OBSERVATIONS_HERE...";
-        color: #441111;
-     }
-
-     .submit-btn {
-        background: var(--terminal-glow);
-        color: var(--terminal-red);
+    .hint-box {
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid var(--term-dim);
         padding: 15px;
-        border: 2px solid var(--terminal-red);
-        cursor: pointer;
-        font-family: inherit;
+        margin-bottom: 15px;
+        font-size: 0.85rem;
+        color: var(--term-white);
+        line-height: 1.6;
+    }
+
+    .hint-box .hint-title {
+        color: var(--term-cyan);
+        font-weight: bold;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    #user-input {
+        flex: 1;
+        width: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid var(--term-dim);
+        color: var(--term-cyan);
+        font-family: var(--font-stack);
+        font-size: 1rem;
+        padding: 15px;
+        resize: none;
+        outline: none;
+        line-height: 1.6;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    #user-input:focus {
+        border-color: var(--term-cyan);
+        box-shadow: 0 0 15px var(--term-cyan-glow);
+    }
+
+    #user-input::placeholder {
+        color: rgba(0, 255, 255, 0.3);
+    }
+
+    /* Action Bar */
+    .action-bar {
+        padding: 15px;
+        border-top: 1px solid var(--term-dim);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.3);
+    }
+
+    .status-info {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .status-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.8rem;
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--term-cyan);
+        animation: pulse-dot 2s infinite;
+    }
+
+    @keyframes pulse-dot {
+        0%, 100% { box-shadow: 0 0 0 0 var(--term-cyan-glow); }
+        50% { box-shadow: 0 0 0 5px transparent; }
+    }
+
+    .submit-btn {
+        background: transparent;
+        border: 2px solid var(--term-cyan);
+        color: var(--term-cyan);
+        padding: 12px 30px;
+        font-family: var(--font-stack);
+        font-size: 1rem;
         font-weight: bold;
         text-transform: uppercase;
-        transition: 0.1s;
         letter-spacing: 2px;
-        width: 100%;
-     }
+        cursor: pointer;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+    }
 
-     .submit-btn:hover {
-        background: var(--terminal-red);
+    .submit-btn:hover {
+        background: var(--term-cyan);
         color: #000;
-        box-shadow: 0 0 20px var(--terminal-glow);
-     }
+        box-shadow: 0 0 30px var(--term-cyan-glow);
+    }
 
-     .submit-btn:active {
-        transform: scale(0.98);
-     }
+    .submit-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 
-     @media (max-width: 768px) {
-        .main {
+    /* Score Popup */
+    .score-popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.8);
+        background: var(--panel-bg);
+        border: 2px solid var(--term-cyan);
+        padding: 40px 60px;
+        z-index: 2000;
+        text-align: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s;
+        box-shadow: 0 0 50px var(--term-cyan-glow);
+    }
+
+    .score-popup.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    .popup-title {
+        font-size: 1rem;
+        color: var(--term-dim);
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        margin-bottom: 15px;
+    }
+
+    .popup-score {
+        font-size: 5rem;
+        font-weight: bold;
+        color: var(--term-cyan);
+        text-shadow: 0 0 30px var(--term-cyan-glow);
+        line-height: 1;
+    }
+
+    .popup-reason {
+        margin-top: 20px;
+        color: var(--term-white);
+        font-size: 0.9rem;
+        max-width: 300px;
+    }
+
+    .popup-close {
+        margin-top: 25px;
+        background: transparent;
+        border: 1px solid var(--term-cyan);
+        color: var(--term-cyan);
+        padding: 10px 25px;
+        font-family: var(--font-stack);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .popup-close:hover {
+        background: var(--term-cyan);
+        color: #000;
+    }
+
+    /* Overlay */
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s;
+    }
+
+    .overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Leaderboard Toggle */
+    .leaderboard-toggle {
+        position: fixed;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--term-cyan);
+        color: #000;
+        padding: 15px 8px;
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        font-size: 0.8rem;
+        font-weight: bold;
+        letter-spacing: 2px;
+        cursor: pointer;
+        z-index: 100;
+        transition: all 0.3s;
+    }
+
+    .leaderboard-toggle:hover {
+        padding-right: 15px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-thumb { background: #008888; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--term-cyan); }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+        .main-content {
             flex-direction: column;
         }
-        .image-container {
-            flex: 0 0 35%; 
+        .panel.image-panel {
+            flex: none;
+            height: 40vh;
         }
-        .input-column {
-            flex: 1;
+        .header {
+            flex-direction: column;
+            gap: 15px;
         }
-     }
+        .header-right {
+            width: 100%;
+            justify-content: space-between;
+        }
+    }
+</style>
 
-     #ta::-webkit-scrollbar { width: 6px; }
-     #ta::-webkit-scrollbar-track { background: #0a0a0a; }
-     #ta::-webkit-scrollbar-thumb { background: #441111; border-radius: 10px; }
-   </style>
+<div class="grid-bg"></div>
+<div class="scanlines"></div>
+<div class="vignette"></div>
 
-   <div class="screen">
-    <div class="tabs">
-        <div class="ticker-wrap">
-            <span class="ticker-item">ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * </span>
-            <span class="ticker-item">ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * ENIGMA * </span>
+<div class="app-container">
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">ENIGMA</div>
+            <div class="round-badge">ROUND 2 // IMAGE</div>
+            <div class="header-clock" id="headerClock">00:00:00</div>
+        </div>
+        <div class="header-right">
+            <div class="question-nav" id="question-nav">
+                <button class="q-btn active" data-q="1">Q1</button>
+                <button class="q-btn" data-q="2">Q2</button>
+                <button class="q-btn" data-q="3">Q3</button>
+            </div>
+            <div class="score-display">
+                <span class="score-label">SCORE</span>
+                <span class="score-value" id="total-score">0</span>
+            </div>
         </div>
     </div>
-    
-    <div class="main">
-        <div class="image-container">
-            <img id="displayImage" src="/assets/apple.png" alt="SECURE_FEED">
+
+    <div class="main-content">
+        <!-- Left Panel: Target Image -->
+        <div class="panel image-panel">
+            <div class="panel-header">
+                <span>// TARGET_VISUAL</span>
+                <span class="panel-tag">[AI_GENERATED]</span>
+            </div>
+            <div class="panel-content">
+                <div class="image-container">
+                    <img id="target-image" src="/assets/coffee.png" alt="Target Image">
+                </div>
+                <div class="image-info">
+                    <div class="image-info-item">Resolution: <span>1024x1024</span></div>
+                    <div class="image-info-item">Question: <span id="img-q-num">1</span>/3</div>
+                    <div class="image-info-item">Type: <span>AI Generated</span></div>
+                </div>
+            </div>
         </div>
+
+        <!-- Right Panel: Input -->
+        <div class="panel input-panel">
+            <div class="panel-header">
+                <span>// PROMPT_RECONSTRUCTION</span>
+                <span class="panel-tag">[YOUR_INPUT]</span>
+            </div>
+            <div class="panel-content">
+                <div class="input-section">
+                    <div class="hint-box">
+                        <span class="hint-title">> MISSION BRIEF:</span>
+                        Analyze the AI-generated image. Reconstruct the prompt that was used to create it.
+                        Include details about: subject, style, lighting, colors, mood, composition.
+                    </div>
+                    <div class="input-label">> Enter image generation prompt:</div>
+                    <textarea id="user-input" placeholder="> Describe what you see...&#10;> Include style, lighting, mood...&#10;> Be specific about composition..." spellcheck="false"></textarea>
+                </div>
+            </div>
+            <div class="action-bar">
+                <div class="status-info">
+                    <div class="status-item">
+                        <div class="status-dot"></div>
+                        <span>CONNECTED</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Q<span id="current-q">1</span> Score: <span id="q-score">--</span></span>
+                    </div>
+                </div>
+                <button class="submit-btn" id="submit-btn" onclick="submitAnswer()">
+                    ANALYZE
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Score Popup -->
+<div class="overlay" id="overlay"></div>
+<div class="score-popup" id="score-popup">
+    <div class="popup-title">Similarity Score</div>
+    <div class="popup-score" id="popup-score">0</div>
+    <div class="popup-reason" id="popup-reason"></div>
+    <button class="popup-close" onclick="closePopup()">CONTINUE</button>
+</div>
+
+<div class="leaderboard-toggle" onclick="requestLeaderboard('r2')">LEADERBOARD</div>
+
+<script>
+(function() {
+    // ============ SECURE DATA STORE ============
+    // Only image paths - NO prompts exposed
+    const questionImages = {
+        1: "/assets/coffee.png",   // Coffee cup image - replace with actual
+        2: "/assets/food.png",     // Food delivery image - replace with actual
+        3: "/assets/brain.png"    // Digital brain image - replace with actual
+    };
+
+    // ============ STATE ============
+    let currentQuestion = 1;
+    let scores = { 1: null, 2: null, 3: null };
+    let totalScore = 0;
+
+    // ============ DOM ELEMENTS ============
+    const targetImage = document.getElementById('target-image');
+    const userInput = document.getElementById('user-input');
+    const submitBtn = document.getElementById('submit-btn');
+    const totalScoreEl = document.getElementById('total-score');
+    const currentQEl = document.getElementById('current-q');
+    const qScoreEl = document.getElementById('q-score');
+    const imgQNum = document.getElementById('img-q-num');
+    const questionNav = document.getElementById('question-nav');
+    const overlay = document.getElementById('overlay');
+    const scorePopup = document.getElementById('score-popup');
+    const popupScore = document.getElementById('popup-score');
+    const popupReason = document.getElementById('popup-reason');
+
+    // ============ INITIALIZATION ============
+    function init() {
+        loadQuestion(1);
+        setupEventListeners();
+        loadSavedScores();
+        updateClock();
+        setInterval(updateClock, 1000);
+    }
+
+    function updateClock() {
+        const clockEl = document.getElementById('headerClock');
+        if (clockEl) {
+            clockEl.textContent = new Date().toTimeString().split(' ')[0];
+        }
+    }
+
+    function setupEventListeners() {
+        // Question navigation
+        questionNav.querySelectorAll('.q-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const q = parseInt(btn.dataset.q);
+                loadQuestion(q);
+            });
+        });
+
+        // Ctrl+Enter to submit
+        userInput.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                submitAnswer();
+            }
+        });
+
+        // Security: Prevent paste of scripts
+        userInput.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+            const sanitized = text.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                                  .replace(/javascript:/gi, '')
+                                  .replace(/on\w+=/gi, '');
+            document.execCommand('insertText', false, sanitized);
+        });
+    }
+
+    // ============ QUESTION LOADING ============
+    function loadQuestion(qNum) {
+        currentQuestion = qNum;
         
-        <div class="input-column">
-            <div id="ta" contenteditable="true" spellcheck="false"></div>
-            <button class="submit-btn" onclick="handleSubmit()">SUBMIT_LOG & NEXT_FEED</button>
-        </div>
-    </div>
-   </div>
+        // Update nav buttons
+        questionNav.querySelectorAll('.q-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (parseInt(btn.dataset.q) === qNum) {
+                btn.classList.add('active');
+            }
+        });
 
-   <script>
-      const images = ["/assets/apple.png", "/assets/cat.png", "/assets/chair.png"]; 
-      let currentIdx = 0;
+        // Glitch effect on image change
+        targetImage.classList.add('image-glitch');
+        setTimeout(() => {
+            targetImage.src = questionImages[qNum];
+            targetImage.classList.remove('image-glitch');
+        }, 300);
 
-      function handleSubmit() {
-          const textArea = document.getElementById('ta');
-          const imgElement = document.getElementById('displayImage');
+        // Update displays
+        currentQEl.textContent = qNum;
+        imgQNum.textContent = qNum;
+        qScoreEl.textContent = scores[qNum] !== null ? scores[qNum] : '--';
 
-          if(textArea.innerText.trim() !== "") {
-              console.log("TX:", textArea.innerText);
-          }
-          
-          textArea.innerText = "";
-          currentIdx = (currentIdx + 1) % images.length;
-          
-          imgElement.style.filter = "brightness(3) invert(1)";
-          
-          setTimeout(() => {
-              imgElement.src = images[currentIdx];
-              imgElement.style.filter = "invert(0)";
-          }, 100);
+        // Clear input
+        userInput.value = '';
+        userInput.focus();
+    }
 
-          textArea.focus();
-      }
-   </script>
+    // ============ SUBMISSION ============
+    window.submitAnswer = function() {
+        const submission = userInput.value.trim();
+        
+        if (!submission) {
+            showNotification('ERROR: Empty submission detected', 'error');
+            return;
+        }
+
+        if (submission.length < 10) {
+            showNotification('ERROR: Prompt too short - be more descriptive', 'error');
+            return;
+        }
+
+        // Disable button
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'ANALYZING...';
+
+        // Send via WebSocket
+        if (typeof socket !== 'undefined' && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                type: 'SUBMIT',
+                round: 'r2',
+                qno: currentQuestion,
+                submission: submission
+            }));
+        } else {
+            showNotification('ERROR: Connection lost', 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'ANALYZE';
+        }
+    };
+
+    // ============ SCORE HANDLING ============
+    window.handleR2Score = function(qno, score, reason) {
+        scores[qno] = score;
+        
+        // Update question button
+        const btn = questionNav.querySelector(`[data-q="${qno}"]`);
+        if (btn) btn.classList.add('completed');
+
+        // Calculate total
+        totalScore = Object.values(scores).filter(s => s !== null).reduce((a, b) => a + b, 0);
+        totalScoreEl.textContent = totalScore;
+
+        // Update current Q score
+        if (qno === currentQuestion) {
+            qScoreEl.textContent = score;
+        }
+
+        // Show popup
+        showScorePopup(score, reason);
+
+        // Save scores
+        saveScores();
+
+        // Re-enable button
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'ANALYZE';
+    };
+
+    function showScorePopup(score, reason) {
+        popupScore.textContent = score;
+        popupReason.textContent = reason || 'Evaluation complete.';
+        overlay.classList.add('show');
+        scorePopup.classList.add('show');
+
+        // Animate score
+        let displayScore = 0;
+        const increment = score / 30;
+        const counter = setInterval(() => {
+            displayScore += increment;
+            if (displayScore >= score) {
+                displayScore = score;
+                clearInterval(counter);
+            }
+            popupScore.textContent = Math.round(displayScore);
+        }, 20);
+    }
+
+    window.closePopup = function() {
+        overlay.classList.remove('show');
+        scorePopup.classList.remove('show');
+    };
+
+    // ============ PERSISTENCE ============
+    function saveScores() {
+        try {
+            sessionStorage.setItem('enigma_r2_scores', JSON.stringify(scores));
+        } catch(e) {}
+    }
+
+    function loadSavedScores() {
+        try {
+            const saved = sessionStorage.getItem('enigma_r2_scores');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                scores = { ...scores, ...parsed };
+                
+                Object.entries(scores).forEach(([q, score]) => {
+                    if (score !== null) {
+                        const btn = questionNav.querySelector(`[data-q="${q}"]`);
+                        if (btn) btn.classList.add('completed');
+                    }
+                });
+
+                totalScore = Object.values(scores).filter(s => s !== null).reduce((a, b) => a + b, 0);
+                totalScoreEl.textContent = totalScore;
+                qScoreEl.textContent = scores[1] !== null ? scores[1] : '--';
+            }
+        } catch(e) {}
+    }
+
+    // ============ NOTIFICATIONS ============
+    function showNotification(message, type = 'info') {
+        const notif = document.createElement('div');
+        notif.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            background: ${type === 'error' ? '#330000' : '#003333'};
+            border: 1px solid ${type === 'error' ? '#ff3333' : '#00ffff'};
+            color: ${type === 'error' ? '#ff3333' : '#00ffff'};
+            font-family: var(--font-stack);
+            z-index: 3000;
+            animation: slideDown 0.3s ease;
+        `;
+        notif.textContent = message;
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 3000);
+    }
+
+    // Initialize
+    init();
+})();
+</script>

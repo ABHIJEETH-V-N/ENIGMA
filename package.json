@@ -1,17 +1,25 @@
 {
-  "name": "alpha",
+  "name": "enigma",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "ENIGMA - A reverse prompting event conducted by THE TROJANS",
+  "main": "enigma.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "enigma":"node enigma.js"
+    "start": "node enigma.js",
+    "enigma": "node enigma.js",
+    "dev": "node --watch enigma.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "enigma",
+    "websocket",
+    "event"
+  ],
+  "author": "THE TROJANS",
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "dotenv": "^17.2.4",
+    "pg": "^8.11.3",
     "ws": "^8.18.3"
   }
 }

@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  enigma:
+    build: .
+    container_name: enigma-event
+    restart: unless-stopped
+    ports:
+      - "2026:2026"  # User WebSocket
+      - "4000:4000"  # Admin WebSocket
+      - "1212:1212"  # Database API
+    environment:
+      - NODE_ENV=production
+    networks:
+      - enigma-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:2026', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  enigma-network:
+    driver: bridge

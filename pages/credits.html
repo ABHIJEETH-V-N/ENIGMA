@@ -1,183 +1,587 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ENIGMA: END_OF_TRANSMISSION</title>
-    <style>
-        :root {
-            --red: #ff0000;
-            --dark-red: #440000;
-            --black: #050505;
-        }
-
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--black);
-            color: var(--red);
-            font-family: monospace;
-            overflow: hidden;
-            cursor: crosshair;
-        }
-
-        /* Film Grain / Static Overlay */
-        .overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExYTFtdjBjbHB1bHNlazlibTltM3h5ZWMxNWw4a2p5aXVoYXUwdmt2OCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3oriNQ9p8DqusVzrBC/giphy.gif');
-            opacity: 0.5;
-            filter: blur(20px);
-            pointer-events: none;
-            background-repeat: no-repeat;
-            background-size: cover;
-            z-index: 0;
-        }
-
-        /* Vertical Scroll Container */
-        .credits-container {
+    <head>    <meta charset="UTF-8">    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>ENIGMA - Credits</title>    <style>        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=JetBrains+Mono:wght@300;400;500;700&family=Rajdhani:wght@400;500;600;700&display=swap');        :root {            --bg-dark: #0a0f0a;            --bg-terminal: #0d1710;            --neon-cyan: #00ff41;            --neon-magenta: #39ff14;            --neon-green: #00ff41;            --neon-blue: #32cd32;            --neon-purple: #00ff7f;            --arch-blue: #00ff41;            --hypr-cyan: #7fff00;            --text-bright: #e0ffe0;            --text-dim: #3a5a3a;            --text-muted: #2d4a2d;            --font-display: 'Orbitron', sans-serif;            --font-mono: 'JetBrains Mono', monospace;            --font-body: 'Rajdhani', sans-serif;        }        * { box-sizing: border-box; margin: 0; padding: 0; }        body {            background: var(--bg-dark);            min-height: 100vh;            font-family: var(--font-mono);            color: var(--text-bright);            overflow: hidden;            cursor: none;        }        /* Custom cursor */        .cursor {            width: 20px;            height: 20px;            border: 2px solid var(--neon-cyan);            border-radius: 50%;            position: fixed;            pointer-events: none;            z-index: 10000;            transition: transform 0.1s, border-color 0.3s;            mix-blend-mode: difference;        }        .cursor-dot {            width: 4px;            height: 4px;            background: var(--neon-magenta);            border-radius: 50%;            position: fixed;            pointer-events: none;            z-index: 10001;        }        /* Animated background */        .bg-layer {            position: fixed;            top: 0; left: 0;            width: 100%; height: 100%;            z-index: 0;        }        /* Matrix rain */        .matrix-canvas {            position: fixed;            top: 0; left: 0;            width: 100%; height: 100%;            opacity: 0.15;            z-index: 1;        }        /* Hyprland-style gradient bars */        .gradient-bar {            position: fixed;            height: 3px;            background: linear-gradient(90deg,                 #00ff41,                 #39ff14,                 #7fff00,                #32cd32,                #00ff7f            );            background-size: 200% 100%;            animation: gradientMove 3s linear infinite;            z-index: 100;        }        .gradient-bar.top { top: 0; left: 0; width: 100%; }        .gradient-bar.bottom { bottom: 0; left: 0; width: 100%; }        @keyframes gradientMove {            0% { background-position: 0% 50%; }            100% { background-position: 200% 50%; }        }        /* Scanlines */        .scanlines {            position: fixed;            top: 0; left: 0;            width: 100%; height: 100%;            background: repeating-linear-gradient(                0deg,                rgba(0,0,0,0.1) 0px,                rgba(0,0,0,0.1) 1px,                transparent 1px,                transparent 3px            );            pointer-events: none;            z-index: 1000;        }        /* Terminal Window Container */        .terminal-container {            position: fixed;            top: 50%;            left: 50%;            transform: translate(-50%, -50%);            width: 90%;            max-width: 1000px;            height: 80vh;            background: var(--bg-terminal);            border: 1px solid rgba(0,255,255,0.3);            border-radius: 12px;            overflow: hidden;            box-shadow:                 0 0 50px rgba(0,255,255,0.1),                0 0 100px rgba(255,0,255,0.05),                inset 0 0 50px rgba(0,0,0,0.5);            z-index: 10;        }        /* Terminal Title Bar - Simple style */        .terminal-titlebar {            height: 40px;            background: rgba(0,20,10,0.9);            border-bottom: 1px solid rgba(0,255,65,0.2);            display: flex;            align-items: center;            padding: 0 15px;            gap: 10px;        }        .window-buttons {            display: flex;            gap: 8px;        }        .window-btn {            width: 14px;            height: 14px;            border-radius: 50%;            border: none;            cursor: pointer;        }        .window-btn.close { background: #ff5f56; }        .window-btn.minimize { background: #ffbd2e; }        .window-btn.maximize { background: #27ca40; }        .terminal-title {            flex: 1;            text-align: center;            font-family: var(--font-mono);            font-size: 0.8rem;            color: var(--text-dim);            letter-spacing: 2px;        }        /* Terminal Content */        .terminal-content {            height: calc(100% - 40px);            overflow: hidden;            position: relative;        }        /* Credits Scroll Container */        .credits-scroll {
             position: absolute;
             width: 100%;
-            top: 100%;
-            animation: scroll 40s linear forwards;
+            padding: 60px 80px;
+            animation: scrollUp 50s linear forwards;
         }
 
-        @keyframes scroll {
-            0% { top: 100%; }
-            100% { top: -220%; }
+        @keyframes scrollUp {
+            0% { transform: translateY(10%); }
+            100% { transform: translateY(-100%); }
         }
 
-        .credit-block {
-            text-align: center;
-            margin-bottom: 150px;
-        }
-
-        .role {
-            font-size: 0.8rem;
-            letter-spacing: 8px;
-            color: #444;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
-
-        .name {
-            font-size: 2rem;
-            letter-spacing: 2px;
-            font-weight: bold;
-            text-shadow: 0 0 15px var(--red);
-        }
-
-        /* The Final Static Screen */
-        #final-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: black;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
+        /* Arch Linux style prompt */
+        .prompt-line {
+            display: flex;
             align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .prompt-user {
+            color: var(--arch-blue);
+            font-weight: 700;
+        }
+
+        .prompt-at {
+            color: var(--text-dim);
+        }
+
+        .prompt-host {
+            color: var(--hypr-cyan);
+            font-weight: 700;
+        }
+
+        .prompt-path {
+            color: var(--neon-magenta);
+        }
+
+        .prompt-symbol {
+            color: var(--neon-green);
+            font-weight: bold;
+        }
+
+        .prompt-cmd {
+            color: var(--text-bright);
+        }
+
+        /* Credit Block */
+        .credit-block {
+            margin-bottom: 60px;
+            padding-left: 20px;
+            border-left: 2px solid var(--text-muted);
+            animation: fadeIn 50s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .credit-category {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .credit-category::before {
+            content: '//';
+            color: var(--neon-cyan);
+        }
+
+        .credit-name {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            background: linear-gradient(90deg, #00ff41, #39ff14);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 5px;
+        }
+
+        .credit-role {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        /* ASCII Art Section */
+        .ascii-section {
+            text-align: center;
+            margin: 80px 0;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            line-height: 1.2;
+            color: var(--neon-cyan);
+            opacity: 0.8;
+        }
+
+        /* Neofetch style info block */
+        .neofetch-block {
+            display: flex;
+            gap: 40px;
+            margin: 60px 0;
+            padding: 30px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(0,255,255,0.2);
+            border-radius: 8px;
+        }
+
+        .neofetch-logo {
+            font-family: var(--font-mono);
+            font-size: 0.5rem;
+            line-height: 1.1;
+            color: var(--arch-blue);
+            white-space: pre;
+        }
+
+        .neofetch-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-size: 0.85rem;
+        }
+
+        .neofetch-line {
+            display: flex;
+            gap: 10px;
+        }
+
+        .neofetch-label {
+            color: var(--neon-cyan);
+            font-weight: bold;
+            min-width: 120px;
+        }
+
+        .neofetch-value {
+            color: var(--text-bright);
+        }
+
+        /* Color palette display */
+        .color-palette {
+            display: flex;
+            gap: 5px;
+            margin-top: 15px;
+        }
+
+        .color-block {
+            width: 25px;
+            height: 25px;
+            border-radius: 4px;
+        }
+
+        /* Final Message */
+        .final-message {
+            text-align: center;
+            margin: 100px 0;
+        }
+
+        .final-title {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            font-weight: 900;
+            letter-spacing: 10px;
+            color: var(--text-bright);
+            text-shadow: 0 0 50px var(--neon-cyan);
+            margin-bottom: 20px;
+        }
+
+        .final-subtitle {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            color: var(--text-dim);
+            letter-spacing: 5px;
+        }
+
+        /* Glitch effect */
+        .glitch {
+            position: relative;
+            animation: glitch 3s infinite;
+        }
+
+        @keyframes glitch {
+            0%, 90%, 100% { transform: none; filter: none; }
+            91% { transform: skewX(5deg); filter: hue-rotate(90deg); }
+            92% { transform: skewX(-5deg); filter: hue-rotate(-90deg); }
+            93% { transform: none; }
+        }
+
+        /* Interactive hint at bottom */
+        .hint {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            letter-spacing: 3px;
+            animation: pulse 2s infinite;
             z-index: 100;
         }
 
-        .static-text {
-            font-size: 8rem;
-            font-weight: 900;
-            letter-spacing: 20px;
-            filter: blur(5px);
-            opacity: 0.3;
-            transition: all 0.2s;
-            user-select: none;
-        }
-
-        .static-active {
-            filter: blur(0px) !important;
-            opacity: 1 !important;
-            text-shadow: 0 0 20px red, 0 0 40px red;
-        }
-
-        .instruction {
-            position: absolute;
-            bottom: 50px;
-            color: #333;
-            letter-spacing: 5px;
-            font-size: 0.7rem;
-            animation: pulse 2s infinite;
-        }
-
         @keyframes pulse {
-            0%, 100% { opacity: 0.2; }
+            0%, 100% { opacity: 0.3; }
             50% { opacity: 0.8; }
         }
 
-        pre {
-            font-size: 10px;
-            line-height: 1;
-            margin-top: 50px;
+        /* Skip button */
+        .skip-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 1001;
+        }
+
+        .skip-btn:hover {
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            box-shadow: 0 0 20px rgba(0,255,255,0.3);
+        }
+
+        /* Final screen overlay */
+        .final-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--bg-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 1s;
+            z-index: 2000;
+        }
+
+        .final-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .final-logo {
+            font-family: var(--font-display);
+            font-size: 1em;
+            font-weight: 900;
+            background: linear-gradient(90deg, #00ff41, #39ff14, #00ff41);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientMove 3s linear infinite;
+            text-shadow: 0 0 100px rgba(0,255,65,0.5);
+        }
+
+        .final-tagline {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            color: var(--text-dim);
+            letter-spacing: 10px;
+            margin-top: 20px;
+        }
+
+        /* Audio visualizer bars */
+        .visualizer {
+            display: flex;
+            gap: 3px;
+            align-items: flex-end;
+            height: 40px;
+            margin-top: 40px;
+        }
+
+        .viz-bar {
+            width: 4px;
+            background: linear-gradient(to top, #00ff41, #39ff14);
+            animation: vizPulse 0.5s ease infinite;
+        }
+
+        /* Watch Again Button */
+        .watch-again-btn {
+            margin-top: 40px;
+            padding: 15px 40px;
+            background: transparent;
+            border: 2px solid #00ff41;
+            color: #00ff41;
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        .watch-again-btn:hover {
+            background: #00ff41;
+            color: #0a0f0a;
+            box-shadow: 0 0 30px rgba(0,255,65,0.5);
+        }
+
+        @keyframes vizPulse {
+            0%, 100% { height: 10px; }
+            50% { height: 40px; }
         }
     </style>
 </head>
 <body>
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-dot" id="cursorDot"></div>
 
-    <div class="overlay"></div>
+    <div class="gradient-bar top"></div>
+    <div class="gradient-bar bottom"></div>
+    <div class="scanlines"></div>
 
-    <div class="credits-container" id="credits">
-        <div class="credit-block">
+    <button class="skip-btn" onclick="skipToEnd()">SKIP ▶</button>
+
+    <div class="terminal-container">
+        <div class="terminal-titlebar">
+            <div class="window-buttons">
+                <div class="window-btn close"></div>
+                <div class="window-btn minimize"></div>
+                <div class="window-btn maximize"></div>
+            </div>
+            <div class="terminal-title">enigma@Terminal </div>
+        </div>
+        
+        <div class="terminal-content">
+            <div class="credits-scroll" id="creditsScroll">
+                <!-- Boot sequence -->
+                <div class="prompt-line">
+                    <span class="prompt-user">root</span>
+                    <span class="prompt-at">@</span>
+                    <span class="prompt-host">enigma</span>
+                    <span class="prompt-path">~</span>
+                    <span class="prompt-symbol">❯</span>
+                    <span class="prompt-cmd">./credits.sh --cinematic</span>
+                </div>
+                
+                <div style="margin: 20px 0; color: var(--text-dim); font-size: 0.8rem;">
+                    [    0.000000] ENIGMA Credits Module v1.0 loaded<br>
+                    [    0.000042] Initializing cinematic sequence...<br>
+                    [    0.001337] Memory allocated: ∞<br>
+                    [    0.002048] Starting credit roll...<br>
+                </div>
+
+                <!-- ASCII Art Logo -->
+                <div class="ascii-section">
+<pre>
+███████╗███╗   ██╗██╗ ██████╗ ███╗   ███╗ █████╗ 
+██╔════╝████╗  ██║██║██╔════╝ ████╗ ████║██╔══██╗
+█████╗  ██╔██╗ ██║██║██║  ███╗██╔████╔██║███████║
+██╔══╝  ██║╚██╗██║██║██║   ██║██║╚██╔╝██║██╔══██║
+███████╗██║ ╚████║██║╚██████╔╝██║ ╚═╝ ██║██║  ██║
+╚══════╝╚═╝  ╚═══╝╚═╝ ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝
+</pre>
+                    <div style="margin-top: 10px; color: var(--neon-magenta); letter-spacing: 5px;">
+                        A REVERSE PROMPT ENGINEERING EVENT
+                    </div>
+                </div>
+
+                <!-- Credits -->
+                <div class="credit-block">
+                    <div class="credit-category">Event Organizers</div>
+                    <div class="credit-name">THE TROJANS</div>
+                    <div class="credit-role">Department of Information Technology</div>
+                </div>
+
+                <div class="credit-block">
+                    <div class="credit-category">Technical Lead</div>
+                    <div class="credit-name">YOUR NAME HERE</div>
+                    <div class="credit-role">System Architecture & Development</div>
+                </div>
+
+                <div class="credit-block">
+                    <div class="credit-category">Event Coordinators</div>
+                    <div class="credit-name">COORDINATOR 1</div>
+                    <div class="credit-role">Planning & Execution</div>
+                </div>
+
+                <div class="credit-block">
+                    <div class="credit-category">Event Coordinators</div>
+                    <div class="credit-name">COORDINATOR 2</div>
+                    <div class="credit-role">Planning & Execution</div>
+                </div>
+
+                <div class="credit-block">
+                    <div class="credit-category">UI/UX Design</div>
+                    <div class="credit-name">DESIGNER NAME</div>
+                    <div class="credit-role">Visual Experience</div>
+                </div>
+
+                <div class="credit-block">
+                    <div class="credit-category">Content Creation</div>
+                    <div class="credit-name">CONTENT TEAM</div>
+                    <div class="credit-role">Prompts & Challenges</div>
+                </div>
+
+                <!-- Neofetch style block -->
+                <div class="neofetch-block">
+                    <div class="neofetch-logo">
+ ███████╗
+ ██╔════╝
+ █████╗  
+ ██╔══╝  
+ ███████╗
+ ╚══════╝
+ ENIGMA
+                    </div>
+                    <div class="neofetch-info">
+                        <div class="neofetch-line">
+                            <span class="neofetch-label">Event</span>
+                            <span class="neofetch-value">ENIGMA 2026</span>
+                        </div>
+                        <div class="neofetch-line">
+                            <span class="neofetch-label">Type</span>
+                            <span class="neofetch-value">Reverse Prompt Engineering</span>
+                        </div>
+                        <div class="neofetch-line">
+                            <span class="neofetch-label">Host</span>
+                            <span class="neofetch-value">The Trojans - IT Dept</span>
+                        </div>
+                        <div class="neofetch-line">
+                            <span class="neofetch-label">Platform</span>
+                            <span class="neofetch-value">Node.js + WebSocket</span>
+                        </div>
+                        <div class="neofetch-line">
+                            <span class="neofetch-label">AI Engine</span>
+                            <span class="neofetch-value">Groq LLaMA 3.3 70B</span>
+                        </div>
+                        <div class="neofetch-line">
+                            <span class="neofetch-label">Version</span>
+                            <span class="neofetch-value">1.0.0</span>
+                        </div>
+                        <div class="color-palette">
+                            <div class="color-block" style="background: #0d1117;"></div>
+                            <div class="color-block" style="background: #00ffff;"></div>
+                            <div class="color-block" style="background: #ff00ff;"></div>
+                            <div class="color-block" style="background: #00ff41;"></div>
+                            <div class="color-block" style="background: #1793d1;"></div>
+                            <div class="color-block" style="background: #00d4aa;"></div>
+                            <div class="color-block" style="background: #bf00ff;"></div>
+                            <div class="color-block" style="background: #ffffff;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="credit-block">
+                    <div class="credit-category">Special Thanks</div>
+                    <div class="credit-name">ALL PARTICIPANTS</div>
+                    <div class="credit-role">For making this event memorable</div>
+                </div>
+
+                <div class="credit-block">
+                    <div class="credit-category">Faculty Advisor</div>
+                    <div class="credit-name">FACULTY NAME</div>
+                    <div class="credit-role">Guidance & Support</div>
+                </div>
+
+                <div class="credit-block">
+                    <div class="credit-category">Institution</div>
+                    <div class="credit-name">YOUR COLLEGE</div>
+                    <div class="credit-role">Venue & Resources</div>
+                </div>
+
+                <!-- Terminal closing -->
+                <div style="margin: 60px 0;">
+                    <div class="prompt-line">
+                        <span class="prompt-user">root</span>
+                        <span class="prompt-at">@</span>
+                        <span class="prompt-host">enigma</span>
+                        <span class="prompt-path">~</span>
+                        <span class="prompt-symbol">❯</span>
+                        <span class="prompt-cmd">echo "Thank you for participating!"</span>
+                    </div>
+                    <div style="color: var(--neon-green); margin: 10px 0 10px 20px;">
+                        Thank you for participating!
+                    </div>
+                    <div class="prompt-line">
+                        <span class="prompt-user">root</span>
+                        <span class="prompt-at">@</span>
+                        <span class="prompt-host">enigma</span>
+                        <span class="prompt-path">~</span>
+                        <span class="prompt-symbol">❯</span>
+                        <span class="prompt-cmd">shutdown -h now</span>
+                    </div>
+                    <div style="color: var(--text-dim); margin: 10px 0 10px 20px; font-size: 0.8rem;">
+                        System going down for poweroff NOW!
+                    </div>
+                </div>
+
+                <!-- Final Message -->
+                <div class="final-message glitch">
+                    <div class="final-title">SIGNAL TERMINATED</div>
+                    <div class="final-subtitle">/// END OF TRANSMISSION ///</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="hint">SCROLL TO EXPLORE • MOVE MOUSE TO INTERACT</div>
+
+    <!-- Final Overlay -->
+    <div class="final-overlay" id="finalOverlay">
+        <div class="final-logo glitch">
             <pre>
-  ███████╗███╗   ██╗██╗ ██████╗ ███╗   ███╗ █████╗ 
-  ██╔════╝████╗  ██║██║██╔════╝ ████╗ ████║██╔══██╗
-  █████╗  ██╔██╗ ██║██║██║  ███╗██╔████╔██║███████║
-  ██╔══╝  ██║╚██╗██║██║██║   ██║██║╚██╔╝██║██╔══██║
-  ███████╗██║ ╚████║██║╚██████╔╝██║ ╚═╝ ██║██║  ██║
-  ╚══════╝╚═╝  ╚═══╝╚═╝ ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝
-            </pre>
+███████╗███╗   ██╗██╗ ██████╗ ███╗   ███╗ █████╗ 
+██╔════╝████╗  ██║██║██╔════╝ ████╗ ████║██╔══██╗
+█████╗  ██╔██╗ ██║██║██║  ███╗██╔████╔██║███████║
+██╔══╝  ██║╚██╗██║██║██║   ██║██║╚██╔╝██║██╔══██║
+███████╗██║ ╚████║██║╚██████╔╝██║ ╚═╝ ██║██║  ██║
+╚══════╝╚═╝  ╚═══╝╚═╝ ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝
+</pre>
         </div>
-
-        <div class="credit-block">
-            <div class="role">Directed By</div>
-            <div class="name">THE ALGORITHM</div>
-        </div>
-
-        <div class="credit-block">
-            <div class="role">Lead Intel Architect</div>
-            <div class="name">OPERATIVE_X</div>
-        </div>
-
-        <div class="credit-block">
-            <div class="role">Encryption Protocols</div>
-            <div class="name">ALAN_TURING_LEGACY</div>
-        </div>
-
-        <div class="credit-block">
-            <div class="role">Visual Reconstruction</div>
-            <div class="name">NEURAL_DENSITY_LABS</div>
-        </div>
-
-        <div class="credit-block">
-            <div class="role">Data Recovery Specialists</div>
-            <div class="name">THE PARTICIPANTS</div>
-        </div>
-
-        <div class="credit-block">
-            <div class="role">Post-War Records</div>
-            <div class="name">BLETCHLEY_PARK_V4</div>
-        </div>
-
-        <div class="credit-block">
-            <div class="role">Special Thanks</div>
-            <div class="name">PROJECT_ENIGMA_DONORS</div>
-        </div>
-
-        <div class="credit-block" style="margin-top: 300px;">
-            <div class="name" style="color: #222;">SIGNAL LOST...</div>
-        </div>
+        <div class="final-tagline">UNTIL NEXT TIME</div>
+        <div class="visualizer" id="visualizer"></div>
+        <button class="watch-again-btn" onclick="watchAgain()">↻ WATCH CREDITS</button>
     </div>
 
-    <div id="final-screen">
-        <div class="static-text" id="logo-text">ENIGMA</div>
-        <div class="instruction">MOVE MOUSE TO STABILIZE SIGNAL</div>
-        <pre id="ascii-final" style="opacity: 0.2;"></pre>
-    </div>
+    <script>
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    const cursorDot = document.getElementById('cursorDot');
+    
+    document.addEventListener('mousemove', (e) => {
+        cursor.style.left = e.clientX - 10 + 'px';
+        cursor.style.top = e.clientY - 10 + 'px';
+        cursorDot.style.left = e.clientX - 2 + 'px';
+        cursorDot.style.top = e.clientY - 2 + 'px';
+    });
 
- 
+    // Visualizer bars
+    const visualizer = document.getElementById('visualizer');
+    for (let i = 0; i < 20; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'viz-bar';
+        bar.style.animationDelay = (i * 0.05) + 's';
+        bar.style.animationDuration = (0.3 + Math.random() * 0.4) + 's';
+        visualizer.appendChild(bar);
+    }
+
+    // Show final overlay after credits finish
+    const creditsScroll = document.getElementById('creditsScroll');
+    creditsScroll.addEventListener('animationend', () => {
+        document.getElementById('finalOverlay').classList.add('show');
+    });
+
+    function skipToEnd() {
+        creditsScroll.style.animation = 'none';
+        document.getElementById('finalOverlay').classList.add('show');
+    }
+
+    function watchAgain() {
+        document.getElementById('finalOverlay').classList.remove('show');
+        creditsScroll.style.animation = 'none';
+        creditsScroll.offsetHeight; // Trigger reflow
+        creditsScroll.style.animation = 'scrollUp 20s linear forwards';
+    }
+
+    // Keyboard shortcut to skip
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' || e.key === ' ') {
+            skipToEnd();
+        }
+    });
+    </script>
+</body>
+</html>
+

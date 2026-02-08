@@ -1,11 +1,40 @@
+# Dependencies
 node_modules
 npm-debug.log
+package-lock.json
+
+# Git
 .git
 .gitignore
-README.md
-.env
-*.md
-.DS_Store
+
+# IDE
 .vscode
-backend
+.idea
+*.swp
+*.swo
+
+# Documentation
+*.md
+README.md
 doc
+
+# Environment
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.log
+coverage
+.nyc_output
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Misc
+backend

@@ -98,7 +98,135 @@ if (qs("#boot-loader")) {
 }
 
 /* =========================================
-   3. GAME ROUND LOGIC (Text & Image)
+   3. AUTHENTICATION SYSTEM
+   ========================================= */
+let isAuthenticated = false;
+let currentRound = "lobby";
+let currentQuestionNo = 1;
+let userName = "";
+
+function showAuthModal() {
+    // Remove existing modal if any
+    const existingModal = document.getElementById('auth-modal');
+    if (existingModal) existingModal.remove();
+    
+    const modal = ce('div');
+    modal.id = 'auth-modal';
+    modal.innerHTML = `
+        <style>
+            #auth-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.95);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            }
+            .auth-box {
+                background: #111;
+                border: 2px solid #33ff00;
+                border-radius: 10px;
+                padding: 40px;
+                max-width: 400px;
+                width: 90%;
+                box-shadow: 0 0 30px rgba(51, 255, 0, 0.3);
+            }
+            .auth-title {
+                color: #33ff00;
+                font-size: 1.5rem;
+                text-align: center;
+                margin-bottom: 30px;
+                text-shadow: 0 0 10px rgba(51, 255, 0, 0.5);
+            }
+            .auth-input {
+                width: 100%;
+                padding: 15px;
+                margin-bottom: 15px;
+                background: #0a0a0a;
+                border: 1px solid #333;
+                border-radius: 5px;
+                color: #fff;
+                font-family: monospace;
+                font-size: 1rem;
+            }
+            .auth-input:focus {
+                outline: none;
+                border-color: #33ff00;
+            }
+            .auth-btn {
+                width: 100%;
+                padding: 15px;
+                background: #33ff00;
+                border: none;
+                border-radius: 5px;
+                color: #000;
+                font-family: monospace;
+                font-size: 1rem;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+            .auth-btn:hover {
+                box-shadow: 0 0 20px rgba(51, 255, 0, 0.5);
+            }
+            .auth-error {
+                color: #ff3333;
+                text-align: center;
+                margin-top: 15px;
+                display: none;
+            }
+        </style>
+        <div class="auth-box">
+            <div class="auth-title">🔐 ENIGMA SESSION LOGIN</div>
+            <input type="text" class="auth-input" id="auth-name" placeholder="Enter your name..." />
+            <input type="password" class="auth-input" id="auth-password" placeholder="Enter session password..." />
+            <button class="auth-btn" onclick="submitAuth()">ACCESS SYSTEM</button>
+            <div class="auth-error" id="auth-error">Invalid password. Access denied.</div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    // Focus name input
+    setTimeout(() => document.getElementById('auth-name')?.focus(), 100);
+    
+    // Enter key support
+    document.getElementById('auth-password')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') submitAuth();
+    });
+}
+
+function submitAuth() {
+    const name = document.getElementById('auth-name')?.value.trim();
+    const password = document.getElementById('auth-password')?.value;
+    
+    if (!name) {
+        showAuthError('Please enter your name');
+        return;
+    }
+    
+    userName = name;
+    socket.send(JSON.stringify({ type: 'AUTH', name, password }));
+}
+
+function showAuthError(message) {
+    const errorEl = document.getElementById('auth-error');
+    if (errorEl) {
+        errorEl.textContent = message;
+        errorEl.style.display = 'block';
+    }
+}
+
+function hideAuthModal() {
+    const modal = document.getElementById('auth-modal');
+    if (modal) modal.remove();
+}
+
+/* =========================================
+   4. GAME ROUND LOGIC (Text & Image)
    ========================================= */
 
 // Config
@@ -148,41 +276,42 @@ function handleTextSubmit(input) {
     }
     input.disabled = true;
 
-    // Simulate Network Request
-    setTimeout(() => {
-        // Send actual data to server here via WebSocket if needed:
-        // socket.send(JSON.stringify({ type: 'ANSWER', value: val }));
+    // Send submission via WebSocket
+    socket.send(JSON.stringify({
+        type: 'SUBMIT',
+        round: 'r1',
+        qno: currentQuestionNo,
+        submission: val
+    }));
 
-        if(statusLine) {
-            statusLine.textContent = "Status: DATA_SENT_SUCCESSFULLY";
-            statusLine.style.color = "var(--term-green)";
-        }
-        
+    // Wait for response (handled in onmessage)
+    setTimeout(() => {
         if(btn) {
             btn.innerHTML = "Execute_Sequence";
             btn.disabled = false;
         }
-        
         input.disabled = false;
         input.value = "";
         input.focus();
-
-        setTimeout(() => {
-            if(statusLine) {
-                statusLine.textContent = "Status: WAITING_FOR_INPUT...";
-                statusLine.style.color = "var(--term-dim)";
-            }
-        }, 3000);
     }, 1000);
 }
 
 function handleImageSubmit(textArea, imgElement) {
-    if (textArea.innerText.trim() !== "") {
-        console.log("TX:", textArea.innerText);
+    const val = textArea.innerText.trim();
+    
+    if (val !== "") {
+        // Send submission via WebSocket
+        socket.send(JSON.stringify({
+            type: 'SUBMIT',
+            round: 'r2',
+            qno: currentQuestionNo,
+            submission: val
+        }));
     }
 
     textArea.innerText = "";
     currentImgIdx = (currentImgIdx + 1) % images.length;
+    currentQuestionNo = currentImgIdx + 1;
 
     // Glitch Effect
     imgElement.style.filter = "brightness(3) invert(1)";
@@ -238,13 +367,154 @@ function setupScreen() {
 }
 
 /* =========================================
-   4. WEBSOCKET & NETWORK CONTROLLER
+   5. WEBSOCKET & NETWORK CONTROLLER
    ========================================= */
 const socket = new WebSocket("ws://" + location.host);
 const container = document.getElementById("content-container");
 
+socket.onopen = () => {
+    console.log("Connected to ENIGMA server");
+};
+
 socket.onmessage = (event) => {
     const data = JSON.parse(event.data);
+
+    // AUTH REQUIRED
+    if (data.type === "AUTH_REQUIRED") {
+        isAuthenticated = false;
+        showAuthModal();
+    }
+
+    // AUTH SUCCESS
+    if (data.type === "AUTH_SUCCESS") {
+        isAuthenticated = true;
+        userName = data.name || userName;
+        hideAuthModal();
+        showNotification("Access granted. Welcome to ENIGMA.", "success");
+        
+        // Store userName for waiting screen and other pages
+        sessionStorage.setItem('enigma_userName', userName);
+        localStorage.setItem('enigma_userName', userName);
+        
+        // Update userName display if on lobby
+        const userNameEl = document.getElementById('userName');
+        if (userNameEl && userName) {
+            userNameEl.textContent = userName.toUpperCase();
+        }
+    }
+
+    // AUTH FAILED
+    if (data.type === "AUTH_FAILED") {
+        showAuthError(data.message || "Invalid password");
+    }
+
+    // ADMIN MESSAGE
+    if (data.type === "ADMIN_MESSAGE") {
+        // Show in lobby admin message box if it exists
+        const adminMsgBox = document.getElementById('adminMessage');
+        const adminMsgText = document.getElementById('adminMessageText');
+        if (adminMsgBox && adminMsgText) {
+            adminMsgText.textContent = data.message;
+            adminMsgBox.classList.add('show');
+        }
+        // Also show as notification
+        showNotification("📢 " + data.message, "info");
+    }
+
+    // SUBMISSION SUCCESS
+    if (data.type === "SUBMIT_SUCCESS") {
+        const statusLine = document.getElementById("status-line");
+        if (statusLine) {
+            statusLine.textContent = "Status: SUBMISSION_ACCEPTED";
+            statusLine.style.color = "var(--term-green)";
+            setTimeout(() => {
+                statusLine.textContent = "Status: WAITING_FOR_INPUT...";
+                statusLine.style.color = "var(--term-dim)";
+            }, 3000);
+        }
+        
+        // Handle score display for R1 and R2
+        if (data.score !== undefined) {
+            if (data.round === 'r1' && typeof handleR1Score === 'function') {
+                handleR1Score(data.qno, data.score, data.reason);
+            } else if (data.round === 'r2' && typeof handleR2Score === 'function') {
+                handleR2Score(data.qno, data.score, data.reason);
+            }
+        }
+        
+        showNotification(`Score: ${data.score || 'Submitted'}`, "success");
+    }
+
+    // SUBMISSION ERROR
+    if (data.type === "SUBMIT_ERROR") {
+        const statusLine = document.getElementById("status-line");
+        if (statusLine) {
+            statusLine.textContent = "Status: SUBMISSION_FAILED";
+            statusLine.style.color = "red";
+        }
+        showNotification(data.message || "Submission failed", "error");
+    }
+
+    // LEADERBOARD
+    if (data.type === "LEADERBOARD") {
+        updateLeaderboard(data.data);
+    }
+
+    // LEADERBOARD UPDATE (for waiting screens)
+    if (data.type === "LEADERBOARD_UPDATE") {
+        // Call the waiting screen render function if it exists
+        if (typeof renderWaitingLeaderboard === 'function') {
+            renderWaitingLeaderboard(data.data, data.topN, data.roundName);
+        }
+    }
+
+    // TIMER EVENTS
+    if (data.type === "TIMER_START" || data.type === "TIMER_UPDATE" || data.type === "TIMER_RESUME") {
+        if (typeof updateTimerDisplay === 'function') {
+            updateTimerDisplay(data.remaining);
+        }
+        // Backup timer display if function doesn't exist
+        const timerEl = document.getElementById('timer') || document.getElementById('countdown');
+        if (timerEl && data.remaining !== undefined) {
+            const mins = Math.floor(data.remaining / 60);
+            const secs = data.remaining % 60;
+            timerEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            // Urgent styling when low time
+            if (data.remaining <= 30) {
+                timerEl.style.color = '#ff3333';
+                timerEl.style.animation = 'pulse 0.5s infinite';
+            } else if (data.remaining <= 60) {
+                timerEl.style.color = '#ffaa00';
+            }
+        }
+    }
+
+    if (data.type === "TIMER_PAUSE" || data.type === "TIMER_STOP") {
+        if (typeof pauseTimerDisplay === 'function') {
+            pauseTimerDisplay(data.remaining);
+        }
+    }
+
+    if (data.type === "TIMER_END") {
+        if (typeof handleTimerEnd === 'function') {
+            handleTimerEnd();
+        }
+        showNotification("⏰ Time's up!", "warning");
+    }
+
+    // ELIMINATION/WAITING
+    if (data.type === "ELIMINATED") {
+        showNotification(data.message || "You have not been selected for the next round", "error");
+    }
+
+    if (data.type === "WAITING") {
+        showNotification(data.message || "Please wait for further instructions", "info");
+    }
+
+    if (data.type === "ADVANCED") {
+        showNotification(`Advancing to ${data.screen}!`, "success");
+    }
 
     // SCREEN SWITCHING
     if (data.type === "UPDATE_CONTENT") {
@@ -256,6 +526,20 @@ socket.onmessage = (event) => {
         setTimeout(() => {
             // Swap HTML
             container.innerHTML = data.html;
+            
+            // Execute any inline scripts in the new content
+            const scripts = container.querySelectorAll('script');
+            scripts.forEach(oldScript => {
+                const newScript = document.createElement('script');
+                // Copy attributes
+                Array.from(oldScript.attributes).forEach(attr => {
+                    newScript.setAttribute(attr.name, attr.value);
+                });
+                // Copy content
+                newScript.textContent = oldScript.textContent;
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+            
             // Fade in
             container.style.opacity = "1";
             
@@ -270,10 +554,44 @@ socket.onmessage = (event) => {
 
         }, 300);
 
-        // Update Title
-        if (data.screen === "lobby") document.title = "ENIGMA - Event Lobby";
-        if (data.screen === "r1") document.title = "ENIGMA - Round 1";
-        if (data.screen === "r2") document.title = "ENIGMA - Round 2";
+        // Update Title and track current round
+        if (data.screen === "lobby") {
+            document.title = "ENIGMA - Event Lobby";
+            currentRound = "lobby";
+            // Update userName display in lobby
+            setTimeout(() => {
+                const userNameEl = document.getElementById('userName');
+                if (userNameEl && userName) {
+                    userNameEl.textContent = userName.toUpperCase();
+                }
+            }, 100);
+        }
+        if (data.screen === "r1") {
+            document.title = "ENIGMA - Round 1";
+            currentRound = "r1";
+            currentQuestionNo = 1;
+        }
+        if (data.screen === "r2") {
+            document.title = "ENIGMA - Round 2";
+            currentRound = "r2";
+            currentQuestionNo = 1;
+        }
+        if (data.screen === "waiting") {
+            document.title = "ENIGMA - Waiting";
+            currentRound = "waiting";
+        }
+        if (data.screen === "waiting1") {
+            document.title = "ENIGMA - Round 1 Results";
+            currentRound = "waiting1";
+        }
+        if (data.screen === "waiting2") {
+            document.title = "ENIGMA - Final Results";
+            currentRound = "waiting2";
+        }
+        if (data.screen === "credits") {
+            document.title = "ENIGMA - Credits";
+            currentRound = "credits";
+        }
     }
 
     // KICK/BAN SYSTEM
@@ -290,10 +608,72 @@ socket.onmessage = (event) => {
 
 socket.onclose = () => {
     console.log("Connection to Enigma Core lost.");
+    showNotification("Connection lost. Please refresh.", "error");
 };
 
+socket.onerror = (err) => {
+    console.error("WebSocket error:", err);
+};
+
+// Request leaderboard
+function requestLeaderboard(tablename) {
+    socket.send(JSON.stringify({ type: 'GET_LEADERBOARD', tablename }));
+}
+
+// Update leaderboard UI (if present)
+function updateLeaderboard(data) {
+    const leaderboardEl = document.getElementById('leaderboard');
+    if (!leaderboardEl || !data) return;
+    
+    leaderboardEl.innerHTML = data.map((entry, idx) => `
+        <div class="leaderboard-entry">
+            <span class="rank">#${idx + 1}</span>
+            <span class="name">${entry.name}</span>
+            <span class="score">${entry.total_score}</span>
+        </div>
+    `).join('');
+}
+
+// Notification system
+function showNotification(message, type = "info") {
+    const existing = document.getElementById('enigma-notification');
+    if (existing) existing.remove();
+    
+    const notif = ce('div');
+    notif.id = 'enigma-notification';
+    notif.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        background: ${type === 'success' ? '#1a4d1a' : type === 'error' ? '#4d1a1a' : '#1a1a4d'};
+        border: 1px solid ${type === 'success' ? '#33ff00' : type === 'error' ? '#ff3333' : '#3333ff'};
+        border-radius: 8px;
+        color: #fff;
+        font-family: monospace;
+        font-size: 0.9rem;
+        z-index: 9999;
+        animation: slideIn 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    `;
+    notif.textContent = message;
+    
+    // Add animation
+    const style = ce('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    document.body.appendChild(notif);
+    setTimeout(() => notif.remove(), 4000);
+}
+
 /* =========================================
-   5. SECURITY LAYER
+   6. SECURITY LAYER
    ========================================= */
 const warn = qs("#refresh-warning");
 document.addEventListener("mousemove", (e) => {
