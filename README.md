@@ -1,138 +1,47 @@
-# 🔐 ENIGMA - Reverse Prompting Event Platform
+<div align="center">
 
-A WebSocket-based real-time event management system for conducting reverse prompting competitions. Built by **THE TROJANS** for the IT Department Symposium.
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=220&section=header&text=ENIGMA&fontSize=80&fontColor=ffffff&animation=fadeIn&fontAlignY=40&desc=Reverse%20Prompt%20Engineering%20Event&descSize=25&descAlignY=60" width="100%" alt="ENIGMA Header" />
 
-## 🚀 Features
+<br>
 
-- **Real-time WebSocket Communication** - Instant sync between admin and participants
-- **Session Password Protection** - Control access with dynamic session passwords
-- **API Load Balancing** - Distribute AI scoring requests across multiple endpoints
-- **Admin Control Panel** - Full event management dashboard
-- **Multi-Round Support** - Lobby, Text Round (R1), and Image Round (R2)
-- **Live Leaderboard** - Real-time score tracking
-- **User Management** - Kick, track, and monitor participants
+### Organized by The IT Department Symposium
+**Chennai Institute Of Technology**
 
-## 📦 Installation
+<br>
 
-```bash
-# Install dependencies
-npm install
+<img src="https://img.shields.io/badge/Event_Date-Feb_10_2026-5D3FD3?style=for-the-badge&logo=calendar&logoColor=white" />
+<img src="https://img.shields.io/badge/Status-Successfully_Conducted-2ea44f?style=for-the-badge&logo=checkmark&logoColor=white" />
+<img src="https://img.shields.io/badge/Mode-Offline-orange?style=for-the-badge&logo=google-maps&logoColor=white" />
 
-# Start the server
-npm start
-# or
-npm run enigma
-```
+<br><br>
 
-## 🐳 Docker Deployment
+---
 
-```bash
-# Build the image
-docker build -t enigma .
+### About The Event
 
-# Run the container
-docker run -d -p 2026:2026 -p 4000:4000 -p 1212:1212 --name enigma-server enigma
-```
+<p width="60%">
+<b>ENIGMA</b> challenged participants to Reverse Engineer Prompt Results. 
+<br>
+Instead of writing prompts to get some results, The participants were given the result and had to 
+<b>reverse-engineer the original prompt</b>. 
+<br><br>
+<i>A test of logic, vocabulary, and visual intelligence.</i>
+</p>
 
-## 🌐 Access Points
+---
 
-| Service | Port | URL |
-|---------|------|-----|
-| Main Event (Users) | 2026 | `http://localhost:2026` |
-| Admin Panel | 4000 | `http://localhost:4000` |
-| Database API | 1212 | `http://localhost:1212` |
+<br>
 
-## 🔧 Configuration
+### 📸 Event Highlights
 
-### API Load Balancer
+<br>
 
-Add API endpoints via the Admin Panel or edit `config.js`:
+<a href="https://www.instagram.com/p/DUSnBLiCcgB/?img_index=1" target="_blank">
+  <img src="https://img.shields.io/badge/Check_Out_The_Official_Post-Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white" height="50" />
+</a>
 
-```javascript
-export const defaultApiEndpoints = [
-    {
-        name: "Groq Primary",
-        url: "https://api.groq.com/openai/v1/chat/completions",
-        key: "your-api-key",
-        weight: 1,
-        model: "llama-3.3-70b-versatile"
-    }
-];
-```
+<br><br>
 
-### Session Management
 
-- Set session passwords from the Admin Panel
-- Toggle session active/inactive state
-- Monitor connected and authenticated users
 
-## 🎮 Admin Panel Features
-
-1. **Round Controls** - Switch between Lobby, Round 1, and Round 2
-2. **Session Management** - Set/clear passwords, toggle sessions
-3. **Live Statistics** - Connected users, authenticated users, uptime
-4. **API Load Balancer** - Add/remove API endpoints, monitor health
-5. **User Management** - View connected users, kick participants
-6. **Activity Log** - Real-time event logging
-
-## 📡 WebSocket Events
-
-### Client → Server
-
-| Event | Description |
-|-------|-------------|
-| `AUTH` | Authenticate with name and password |
-| `SUBMIT` | Submit answer for scoring |
-| `GET_LEADERBOARD` | Request leaderboard data |
-
-### Server → Client
-
-| Event | Description |
-|-------|-------------|
-| `AUTH_REQUIRED` | Password authentication required |
-| `AUTH_SUCCESS` | Authentication successful |
-| `AUTH_FAILED` | Authentication failed |
-| `UPDATE_CONTENT` | Screen/round change |
-| `SUBMIT_SUCCESS` | Submission accepted |
-| `LEADERBOARD` | Leaderboard data |
-| `FORCE_EXIT` | User kicked |
-
-## 🗄️ Database Requirements
-
-PostgreSQL database with the following:
-- Tables: `r1`, `r2` (for submissions)
-- Stored Procedures: `SUBMIT1`, `SUBMIT2`
-- Function: `get_leaderboard`
-
-## 📁 Project Structure
-
-```
-ENIGMA/
-├── enigma.js          # Main server
-├── db_server.js       # Database & API handlers
-├── data.js            # Questions data
-├── config.js          # Configuration
-├── package.json
-├── Dockerfile
-├── assets/
-│   ├── codex.js       # Client-side logic
-│   └── images...
-└── pages/
-    ├── layout.html    # Main wrapper
-    ├── admin.html     # Admin panel
-    ├── lobby.html     # Lobby screen
-    ├── text.html      # Round 1
-    ├── img.html       # Round 2
-    └── credits.html
-```
-
-## 🔒 Security
-
-- Anti-inspect measures (disabled dev tools shortcuts)
-- Session-based authentication
-- IP tracking for all connections
-- Admin kick functionality
-
-## 📝 License
-
-ISC - THE TROJANS
+</div>
