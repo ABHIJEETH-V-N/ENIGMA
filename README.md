@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/Enigma.png" height="50%" width="50%" style="filter: drop-shadow(0 0 15px #5D3FD3);">
+<img src="assets/enigmaa.svg" height="30%" width="30%" style="filter: drop-shadow(0 0 15px #5D3FD3);">
 
 <br><br>
 
